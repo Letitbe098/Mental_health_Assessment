@@ -1,18 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Brain, 
-  AlertCircle, 
-  Check, 
-  ArrowRight, 
-  ArrowLeft, 
-  ChevronDown,
-  ChevronUp,
-  Music,
-  Palette,
-  Wind,
-  Yoga
-} from 'lucide-react';
+import { Brain, AlertCircle, Check, ArrowRight, ArrowLeft, ChevronDown, ChevronUp, Music, Palette, Wind, Cog as Yoga } from 'lucide-react';
 import { 
   AssessmentQuestion, 
   AssessmentType,
