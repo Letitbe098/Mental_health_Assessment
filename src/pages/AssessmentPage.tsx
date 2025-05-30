@@ -7,20 +7,26 @@ import {
   ArrowRight, 
   ArrowLeft, 
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Music,
+  Palette,
+  Wind,
+  Yoga
 } from 'lucide-react';
 import { 
   AssessmentQuestion, 
   AssessmentType,
+  AgeGroup,
   AssessmentResult,
-  depressionQuestions,
-  anxietyQuestions,
+  ageGroups,
+  getAgeSpecificQuestions,
   interpretDepressionResult,
   interpretAnxietyResult
 } from '../models/assessmentTypes';
 
 const AssessmentPage: React.FC = () => {
   const [activeAssessment, setActiveAssessment] = useState<AssessmentType | null>(null);
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState<AgeGroup | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<AssessmentResult | null>(null);
@@ -32,7 +38,7 @@ const AssessmentPage: React.FC = () => {
       title: 'Depression Assessment',
       description: 'PHQ-9 depression screening questionnaire',
       icon: <Brain size={24} />,
-      questions: depressionQuestions,
+      questions: (ageGroup: AgeGroup) => getAgeSpecificQuestions('depression', ageGroup),
       interpretResult: interpretDepressionResult,
     },
     {
@@ -40,13 +46,14 @@ const AssessmentPage: React.FC = () => {
       title: 'Anxiety Assessment',
       description: 'GAD-7 anxiety screening questionnaire',
       icon: <AlertCircle size={24} />,
-      questions: anxietyQuestions,
+      questions: (ageGroup: AgeGroup) => getAgeSpecificQuestions('anxiety', ageGroup),
       interpretResult: interpretAnxietyResult,
     },
   ];
 
   const startAssessment = (type: AssessmentType) => {
     setActiveAssessment(type);
+    setSelectedAgeGroup(null);
     setCurrentStep(0);
     setAnswers({});
     setResult(null);
@@ -60,41 +67,47 @@ const AssessmentPage: React.FC = () => {
   };
 
   const nextStep = () => {
+    if (!selectedAgeGroup) {
+      setCurrentStep(1);
+      return;
+    }
+
     const assessment = assessmentTypes.find(a => a.id === activeAssessment);
     if (!assessment) return;
 
-    if (currentStep < assessment.questions.length - 1) {
+    const questions = assessment.questions(selectedAgeGroup);
+
+    if (currentStep < questions.length) {
       setCurrentStep(prev => prev + 1);
     } else {
       // Calculate result
       const totalScore = Object.values(answers).reduce((sum, value) => sum + value, 0);
-      const result = assessment.interpretResult(totalScore);
+      const result = assessment.interpretResult(totalScore, selectedAgeGroup);
       setResult(result);
     }
   };
 
   const prevStep = () => {
-    if (currentStep > 0) {
+    if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
+    } else if (currentStep === 1) {
+      setSelectedAgeGroup(null);
+      setCurrentStep(0);
     } else {
-      // Go back to assessment selection
       setActiveAssessment(null);
     }
   };
 
   const restartAssessment = () => {
     setActiveAssessment(null);
+    setSelectedAgeGroup(null);
     setCurrentStep(0);
     setAnswers({});
     setResult(null);
   };
 
   const toggleSection = (section: string) => {
-    if (expandedSection === section) {
-      setExpandedSection(null);
-    } else {
-      setExpandedSection(section);
-    }
+    setExpandedSection(expandedSection === section ? null : section);
   };
 
   const renderAssessmentSelection = () => {
@@ -107,9 +120,7 @@ const AssessmentPage: React.FC = () => {
           </p>
           <div className="bg-primary-50 border border-primary-100 rounded-lg p-4 text-primary-800 inline-block">
             <div className="flex items-start">
-              <div className="mr-3 mt-1">
-                <AlertCircle size={20} className="text-primary-500" />
-              </div>
+              <AlertCircle size={20} className="text-primary-500 mr-2 mt-0.5" />
               <div className="text-left">
                 <p className="font-medium">Important Note</p>
                 <p className="text-sm">
@@ -137,7 +148,7 @@ const AssessmentPage: React.FC = () => {
                   <h3 className="text-xl font-semibold mb-2">{assessment.title}</h3>
                   <p className="text-gray-600 mb-3">{assessment.description}</p>
                   <p className="text-sm text-gray-500">
-                    {assessment.questions.length} questions • ~3 minutes
+                    Age-appropriate questions • ~5 minutes
                   </p>
                 </div>
               </div>
@@ -153,16 +164,16 @@ const AssessmentPage: React.FC = () => {
         <div className="mt-12 bg-gray-50 rounded-lg p-6">
           <h3 className="text-xl font-semibold mb-4">About Our Assessments</h3>
           <p className="text-gray-600 mb-4">
-            Our assessments are based on clinically validated screening tools used by healthcare professionals:
+            Our assessments are based on clinically validated screening tools, adapted for different age groups:
           </p>
           <ul className="space-y-2 text-gray-600">
             <li className="flex items-start">
               <Check size={18} className="text-secondary-500 mr-2 mt-1" />
-              <span>The PHQ-9 is a 9-question instrument used to screen for depression severity.</span>
+              <span>Age-appropriate questions for children, teens, adults, and seniors.</span>
             </li>
             <li className="flex items-start">
               <Check size={18} className="text-secondary-500 mr-2 mt-1" />
-              <span>The GAD-7 is a 7-question instrument used to screen for anxiety severity.</span>
+              <span>Personalized recommendations including color therapy, music, and exercises.</span>
             </li>
             <li className="flex items-start">
               <Check size={18} className="text-secondary-500 mr-2 mt-1" />
@@ -170,7 +181,7 @@ const AssessmentPage: React.FC = () => {
             </li>
             <li className="flex items-start">
               <Check size={18} className="text-secondary-500 mr-2 mt-1" />
-              <span>Results are provided instantly with personalized recommendations.</span>
+              <span>Results are provided instantly with age-appropriate guidance.</span>
             </li>
           </ul>
         </div>
@@ -178,12 +189,62 @@ const AssessmentPage: React.FC = () => {
     );
   };
 
+  const renderAgeGroupSelection = () => {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Select Your Age Group</h2>
+          <p className="text-gray-600">
+            We'll provide age-appropriate questions and recommendations based on your selection.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {ageGroups.map((group) => (
+            <motion.button
+              key={group.id}
+              className={`p-4 rounded-lg border text-left transition-all ${
+                selectedAgeGroup === group.id
+                  ? 'border-primary-500 bg-primary-50 text-primary-700'
+                  : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50/50'
+              }`}
+              onClick={() => setSelectedAgeGroup(group.id as AgeGroup)}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 className="font-semibold mb-1">{group.label}</h3>
+              <p className="text-sm text-gray-600">{group.description}</p>
+            </motion.button>
+          ))}
+        </div>
+
+        <div className="mt-8 flex justify-between">
+          <button
+            onClick={prevStep}
+            className="btn-outline flex items-center"
+          >
+            <ArrowLeft size={18} className="mr-1" /> Back
+          </button>
+          <button
+            onClick={nextStep}
+            disabled={!selectedAgeGroup}
+            className="btn-primary flex items-center"
+          >
+            Continue <ArrowRight size={18} className="ml-1" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderAssessmentQuestions = () => {
+    if (!selectedAgeGroup) return null;
+
     const assessment = assessmentTypes.find(a => a.id === activeAssessment);
     if (!assessment) return null;
 
-    const currentQuestion = assessment.questions[currentStep];
-    const progress = ((currentStep + 1) / assessment.questions.length) * 100;
+    const questions = assessment.questions(selectedAgeGroup);
+    const currentQuestion = questions[currentStep - 1];
+    const progress = (currentStep / questions.length) * 100;
 
     return (
       <div className="max-w-2xl mx-auto">
@@ -191,7 +252,7 @@ const AssessmentPage: React.FC = () => {
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-2xl font-bold">{assessment.title}</h2>
             <span className="text-sm text-gray-500">
-              Question {currentStep + 1} of {assessment.questions.length}
+              Question {currentStep} of {questions.length}
             </span>
           </div>
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -204,9 +265,8 @@ const AssessmentPage: React.FC = () => {
 
         <div className="card mb-8">
           <h3 className="text-xl font-medium mb-6">
-            Over the last 2 weeks, how often have you been bothered by:
+            {currentQuestion.text}
           </h3>
-          <p className="text-lg mb-6">{currentQuestion.text}</p>
 
           <div className="space-y-3">
             {currentQuestion.options.map((option) => (
@@ -248,7 +308,7 @@ const AssessmentPage: React.FC = () => {
             disabled={answers[currentQuestion.id] === undefined}
             className="btn-primary flex items-center"
           >
-            {currentStep < assessment.questions.length - 1 ? (
+            {currentStep < questions.length ? (
               <>Next <ArrowRight size={18} className="ml-1" /></>
             ) : (
               <>View Results <ArrowRight size={18} className="ml-1" /></>
@@ -260,14 +320,29 @@ const AssessmentPage: React.FC = () => {
   };
 
   const renderResults = () => {
-    if (!result) return null;
+    if (!result || !selectedAgeGroup) return null;
+
+    const getTherapyIcon = (type: string) => {
+      switch (type) {
+        case 'color':
+          return <Palette size={24} />;
+        case 'music':
+          return <Music size={24} />;
+        case 'breathing':
+          return <Wind size={24} />;
+        case 'yoga':
+          return <Yoga size={24} />;
+        default:
+          return <Check size={24} />;
+      }
+    };
 
     return (
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-4">Your Assessment Results</h2>
           <p className="text-gray-600">
-            Based on your responses, we've generated the following insights about your mental wellbeing.
+            Based on your responses, we've generated personalized insights and recommendations.
           </p>
         </div>
 
@@ -288,12 +363,13 @@ const AssessmentPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Therapeutic Recommendations */}
           <div className="border-t border-gray-200 pt-6 mt-6">
             <div 
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('recommendations')}
             >
-              <h3 className="text-xl font-semibold">Recommendations</h3>
+              <h3 className="text-xl font-semibold">Personalized Recommendations</h3>
               {expandedSection === 'recommendations' ? (
                 <ChevronUp size={20} className="text-gray-500" />
               ) : (
@@ -302,13 +378,30 @@ const AssessmentPage: React.FC = () => {
             </div>
             
             {expandedSection === 'recommendations' && (
-              <div className="mt-4 space-y-3">
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {result.recommendations.map((recommendation, index) => (
-                  <div key={index} className="flex items-start">
-                    <div className="p-1 rounded-full bg-primary-100 text-primary-600 mr-3 mt-0.5">
-                      <Check size={16} />
+                  <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-start">
+                      <div className="p-2 rounded-full bg-white border border-gray-200 mr-3">
+                        {getTherapyIcon(recommendation.type)}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">{recommendation.title}</h4>
+                        <p className="text-gray-600 text-sm mb-2">{recommendation.description}</p>
+                        {recommendation.duration && (
+                          <p className="text-sm text-primary-600">
+                            Recommended duration: {recommendation.duration}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-gray-700">{recommendation}</p>
+                    {recommendation.imageUrl && (
+                      <img 
+                        src={recommendation.imageUrl} 
+                        alt={recommendation.title}
+                        className="w-full h-32 object-cover rounded-lg mt-3"
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -320,7 +413,9 @@ const AssessmentPage: React.FC = () => {
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('nextSteps')}
             >
-              <h3 className="text-xl font-semibold">Next Steps</h3>
+              <h3 className="text-xl font-semibol
+
+d">Next Steps</h3>
               {expandedSection === 'nextSteps' ? (
                 <ChevronUp size={20} className="text-gray-500" />
               ) : (
@@ -350,7 +445,7 @@ const AssessmentPage: React.FC = () => {
                     <div className="p-1 rounded-full bg-primary-100 text-primary-600 mr-3 mt-0.5">
                       <Check size={16} />
                     </div>
-                    <p className="text-gray-700">Explore our Resources section for self-help materials</p>
+                    <p className="text-gray-700">Try the recommended therapeutic activities</p>
                   </li>
                   <li className="flex items-start">
                     <div className="p-1 rounded-full bg-primary-100 text-primary-600 mr-3 mt-0.5">
@@ -406,7 +501,8 @@ const AssessmentPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-12">
       {activeAssessment === null && renderAssessmentSelection()}
-      {activeAssessment !== null && result === null && renderAssessmentQuestions()}
+      {activeAssessment !== null && currentStep === 0 && renderAgeGroupSelection()}
+      {activeAssessment !== null && currentStep > 0 && result === null && renderAssessmentQuestions()}
       {result !== null && renderResults()}
     </div>
   );

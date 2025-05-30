@@ -15,9 +15,17 @@ export interface AssessmentOption {
 export interface AssessmentResult {
   score: number;
   interpretation: string;
-  recommendations: string[];
+  recommendations: Recommendation[];
   severity: 'minimal' | 'mild' | 'moderate' | 'severe';
   color: string; // For UI representation
+}
+
+export interface Recommendation {
+  type: 'color' | 'music' | 'yoga' | 'breathing' | 'general';
+  title: string;
+  description: string;
+  duration?: string;
+  imageUrl?: string;
 }
 
 export interface AssessmentHistory {
@@ -26,11 +34,39 @@ export interface AssessmentHistory {
   date: Date;
   score: number;
   severity: 'minimal' | 'mild' | 'moderate' | 'severe';
+  ageGroup: AgeGroup;
 }
 
 export type AssessmentType = 'depression' | 'anxiety' | 'stress' | 'sleep' | 'general';
+export type AgeGroup = 'child' | 'teen' | 'adult' | 'senior';
 
-// PHQ-9 Depression Assessment
+// Age-specific question sets
+export const getAgeSpecificQuestions = (type: AssessmentType, ageGroup: AgeGroup): AssessmentQuestion[] => {
+  switch (type) {
+    case 'depression':
+      return ageGroup === 'child' ? childDepressionQuestions :
+             ageGroup === 'teen' ? teenDepressionQuestions :
+             ageGroup === 'senior' ? seniorDepressionQuestions :
+             depressionQuestions;
+    case 'anxiety':
+      return ageGroup === 'child' ? childAnxietyQuestions :
+             ageGroup === 'teen' ? teenAnxietyQuestions :
+             ageGroup === 'senior' ? seniorAnxietyQuestions :
+             anxietyQuestions;
+    default:
+      return depressionQuestions;
+  }
+};
+
+// Age group definitions
+export const ageGroups = [
+  { id: 'child', label: 'Child (6-12 years)', description: 'Questions adapted for children' },
+  { id: 'teen', label: 'Teen (13-19 years)', description: 'Questions focused on adolescent experiences' },
+  { id: 'adult', label: 'Adult (20-64 years)', description: 'Standard assessment questions' },
+  { id: 'senior', label: 'Senior (65+ years)', description: 'Questions adapted for older adults' },
+];
+
+// Standard PHQ-9 Depression Questions (Adult version)
 export const depressionQuestions: AssessmentQuestion[] = [
   {
     id: 'phq-1',
@@ -124,7 +160,59 @@ export const depressionQuestions: AssessmentQuestion[] = [
   },
 ];
 
-// GAD-7 Anxiety Assessment
+// Child-specific depression questions
+export const childDepressionQuestions: AssessmentQuestion[] = [
+  {
+    id: 'child-dep-1',
+    text: 'Do you feel sad or unhappy most of the time?',
+    options: [
+      { id: 'child-dep-1-0', text: 'No, I usually feel happy', value: 0 },
+      { id: 'child-dep-1-1', text: 'Sometimes I feel sad', value: 1 },
+      { id: 'child-dep-1-2', text: 'I feel sad a lot', value: 2 },
+      { id: 'child-dep-1-3', text: 'I feel sad almost all the time', value: 3 },
+    ],
+  },
+  {
+    id: 'child-dep-2',
+    text: 'Do you still enjoy playing with your favorite toys or doing activities you used to like?',
+    options: [
+      { id: 'child-dep-2-0', text: 'Yes, just as much as before', value: 0 },
+      { id: 'child-dep-2-1', text: 'A little less than before', value: 1 },
+      { id: 'child-dep-2-2', text: 'Much less than before', value: 2 },
+      { id: 'child-dep-2-3', text: 'I don\'t enjoy them anymore', value: 3 },
+    ],
+  },
+];
+
+// Teen-specific depression questions
+export const teenDepressionQuestions: AssessmentQuestion[] = [
+  {
+    id: 'teen-dep-1',
+    text: 'How often do you feel overwhelmed by school or social pressures?',
+    options: [
+      { id: 'teen-dep-1-0', text: 'Rarely or never', value: 0 },
+      { id: 'teen-dep-1-1', text: 'Sometimes', value: 1 },
+      { id: 'teen-dep-1-2', text: 'Often', value: 2 },
+      { id: 'teen-dep-1-3', text: 'Almost always', value: 3 },
+    ],
+  },
+];
+
+// Senior-specific depression questions
+export const seniorDepressionQuestions: AssessmentQuestion[] = [
+  {
+    id: 'senior-dep-1',
+    text: 'How often do you feel isolated or lonely?',
+    options: [
+      { id: 'senior-dep-1-0', text: 'Rarely or never', value: 0 },
+      { id: 'senior-dep-1-1', text: 'Sometimes', value: 1 },
+      { id: 'senior-dep-1-2', text: 'Often', value: 2 },
+      { id: 'senior-dep-1-3', text: 'Almost always', value: 3 },
+    ],
+  },
+];
+
+// Standard GAD-7 Anxiety Questions (Adult version)
 export const anxietyQuestions: AssessmentQuestion[] = [
   {
     id: 'gad-1',
@@ -198,19 +286,94 @@ export const anxietyQuestions: AssessmentQuestion[] = [
   },
 ];
 
+// Age-specific anxiety questions follow the same pattern
+export const childAnxietyQuestions: AssessmentQuestion[] = [];
+
+export const teenAnxietyQuestions: AssessmentQuestion[] = [];
+
+export const seniorAnxietyQuestions: AssessmentQuestion[] = [];
+
+// Therapeutic recommendations based on assessment results
+export const getTherapeuticRecommendations = (score: number, ageGroup: AgeGroup): Recommendation[] => {
+  const baseRecommendations: Recommendation[] = [
+    {
+      type: 'color',
+      title: 'Color Therapy',
+      description: 'Spend time in a room with calming blue or green tones. These colors are known to reduce stress and anxiety.',
+      imageUrl: 'https://images.pexels.com/photos/3255761/pexels-photo-3255761.jpeg'
+    },
+    {
+      type: 'music',
+      title: 'Music Therapy',
+      description: 'Listen to calming classical or nature sounds for 15-20 minutes.',
+      duration: '15-20 minutes',
+      imageUrl: 'https://images.pexels.com/photos/4088801/pexels-photo-4088801.jpeg'
+    },
+    {
+      type: 'yoga',
+      title: 'Simple Yoga Poses',
+      description: 'Try child\'s pose or cat-cow stretches to release tension.',
+      duration: '10-15 minutes',
+      imageUrl: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg'
+    },
+    {
+      type: 'breathing',
+      title: 'Deep Breathing Exercise',
+      description: 'Practice 4-7-8 breathing: Inhale for 4 counts, hold for 7, exhale for 8.',
+      duration: '5-10 minutes',
+      imageUrl: 'https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg'
+    }
+  ];
+
+  // Add age-specific recommendations
+  switch (ageGroup) {
+    case 'child':
+      return [
+        ...baseRecommendations,
+        {
+          type: 'general',
+          title: 'Drawing and Coloring',
+          description: 'Express your feelings through art using bright, happy colors.',
+          imageUrl: 'https://images.pexels.com/photos/159579/crayons-coloring-book-coloring-book-159579.jpeg'
+        }
+      ];
+    case 'teen':
+      return [
+        ...baseRecommendations,
+        {
+          type: 'general',
+          title: 'Journal Writing',
+          description: 'Write down your thoughts and feelings in a private journal.',
+          imageUrl: 'https://images.pexels.com/photos/6357/coffee-desk-notes-workspace.jpg'
+        }
+      ];
+    case 'senior':
+      return [
+        ...baseRecommendations,
+        {
+          type: 'general',
+          title: 'Gentle Walking',
+          description: 'Take a short walk in nature or around your garden.',
+          duration: '15-20 minutes',
+          imageUrl: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg'
+        }
+      ];
+    default:
+      return baseRecommendations;
+  }
+};
+
 // Interpret depression assessment results
-export const interpretDepressionResult = (score: number): AssessmentResult => {
+export const interpretDepressionResult = (score: number, ageGroup: AgeGroup): AssessmentResult => {
+  const recommendations = getTherapeuticRecommendations(score, ageGroup);
+  
   if (score <= 4) {
     return {
       score,
       severity: 'minimal',
       color: '#4A90E2',
       interpretation: 'Your responses suggest minimal or no depression symptoms.',
-      recommendations: [
-        'Continue maintaining your mental wellbeing through regular exercise and social connection',
-        'Practice mindfulness or meditation to maintain emotional balance',
-        'Consider taking periodic self-assessments to monitor your mental health'
-      ]
+      recommendations
     };
   } else if (score <= 9) {
     return {
@@ -218,12 +381,7 @@ export const interpretDepressionResult = (score: number): AssessmentResult => {
       severity: 'mild',
       color: '#50C878',
       interpretation: 'Your responses suggest mild depression symptoms.',
-      recommendations: [
-        'Consider speaking with a mental health professional about your symptoms',
-        'Incorporate regular exercise and social activities into your routine',
-        'Practice stress-reduction techniques like deep breathing or meditation',
-        'Maintain a regular sleep schedule and healthy diet'
-      ]
+      recommendations
     };
   } else if (score <= 14) {
     return {
@@ -231,13 +389,7 @@ export const interpretDepressionResult = (score: number): AssessmentResult => {
       severity: 'moderate',
       color: '#F59E0B',
       interpretation: 'Your responses suggest moderate depression symptoms.',
-      recommendations: [
-        'We recommend consulting with a mental health professional to discuss your symptoms',
-        'Consider cognitive behavioral therapy or other evidence-based treatments',
-        'Establish a routine with regular sleep, exercise, and nutrition',
-        'Connect with supportive friends or family members',
-        'Practice self-care activities that you enjoy'
-      ]
+      recommendations
     };
   } else {
     return {
@@ -245,30 +397,22 @@ export const interpretDepressionResult = (score: number): AssessmentResult => {
       severity: 'severe',
       color: '#EF4444',
       interpretation: 'Your responses suggest severe depression symptoms.',
-      recommendations: [
-        'We strongly recommend seeking professional help from a mental health provider soon',
-        'Consider reaching out to a crisis helpline if you have thoughts of harming yourself',
-        'Talk to your doctor about treatment options, which may include therapy and/or medication',
-        'Let trusted friends or family members know what you\'re experiencing',
-        'Focus on basic self-care: sleep, nutrition, and gentle physical activity'
-      ]
+      recommendations
     };
   }
 };
 
 // Interpret anxiety assessment results
-export const interpretAnxietyResult = (score: number): AssessmentResult => {
+export const interpretAnxietyResult = (score: number, ageGroup: AgeGroup): AssessmentResult => {
+  const recommendations = getTherapeuticRecommendations(score, ageGroup);
+  
   if (score <= 4) {
     return {
       score,
       severity: 'minimal',
       color: '#4A90E2',
       interpretation: 'Your responses suggest minimal or no anxiety symptoms.',
-      recommendations: [
-        'Continue maintaining your mental wellbeing through regular exercise and stress management',
-        'Practice mindfulness or meditation to maintain emotional balance',
-        'Consider taking periodic self-assessments to monitor your mental health'
-      ]
+      recommendations
     };
   } else if (score <= 9) {
     return {
@@ -276,12 +420,7 @@ export const interpretAnxietyResult = (score: number): AssessmentResult => {
       severity: 'mild',
       color: '#50C878',
       interpretation: 'Your responses suggest mild anxiety symptoms.',
-      recommendations: [
-        'Consider speaking with a mental health professional about your symptoms',
-        'Practice relaxation techniques like deep breathing, progressive muscle relaxation, or meditation',
-        'Limit caffeine and alcohol which can worsen anxiety',
-        'Maintain regular physical activity which can help reduce anxiety'
-      ]
+      recommendations
     };
   } else if (score <= 14) {
     return {
@@ -289,13 +428,7 @@ export const interpretAnxietyResult = (score: number): AssessmentResult => {
       severity: 'moderate',
       color: '#F59E0B',
       interpretation: 'Your responses suggest moderate anxiety symptoms.',
-      recommendations: [
-        'We recommend consulting with a mental health professional to discuss your symptoms',
-        'Consider cognitive behavioral therapy which is effective for anxiety disorders',
-        'Learn and practice grounding techniques for moments of heightened anxiety',
-        'Establish a regular sleep schedule and practice good sleep hygiene',
-        'Consider joining a support group for people with anxiety'
-      ]
+      recommendations
     };
   } else {
     return {
@@ -303,13 +436,7 @@ export const interpretAnxietyResult = (score: number): AssessmentResult => {
       severity: 'severe',
       color: '#EF4444',
       interpretation: 'Your responses suggest severe anxiety symptoms.',
-      recommendations: [
-        'We strongly recommend seeking professional help from a mental health provider soon',
-        'Talk to your doctor about treatment options, which may include therapy and/or medication',
-        'Learn about and practice crisis management techniques for panic or anxiety attacks',
-        'Limit exposure to stressful situations and news when possible',
-        'Reach out to trusted friends or family members for support'
-      ]
+      recommendations
     };
   }
 };
