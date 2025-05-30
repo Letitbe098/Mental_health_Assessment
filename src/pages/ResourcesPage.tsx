@@ -95,7 +95,7 @@ const resources = [
     description: 'A comprehensive list of emergency mental health resources, hotlines, and services available 24/7.',
     category: 'emergency',
     tags: ['crisis', 'emergency', 'support'],
-    image: 'https://images.pexels.com/photos/4386371/pexels-photo-4386371.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://cdn.sanity.io/images/68lp9qid/production/683723515cae0753002ae39ba4972d1a7a114005-3200x1800.png',
     source: 'National Crisis Support Network',
     readTime: '5 min read',
     featured: true
@@ -265,12 +265,12 @@ const ResourcesPage = () => {
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div className="rounded-md bg-white p-4 shadow-sm">
                   <h3 className="font-medium text-gray-800">National Suicide Prevention Lifeline</h3>
-                  <p className="text-lg font-bold text-primary">1-800-273-8255</p>
+                  <p className="text-lg font-bold text-primary">+91 9152987821</p>
                   <p className="text-sm text-gray-600">Available 24/7</p>
                 </div>
                 <div className="rounded-md bg-white p-4 shadow-sm">
                   <h3 className="font-medium text-gray-800">Crisis Text Line</h3>
-                  <p className="text-lg font-bold text-primary">Text HOME to 741741</p>
+                  <p className="text-lg font-bold text-primary">022 2754 6669</p>
                   <p className="text-sm text-gray-600">Available 24/7</p>
                 </div>
               </div>
