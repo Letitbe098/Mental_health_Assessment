@@ -9,7 +9,11 @@ interface Doctor {
   address: string;
   phone: string;
   rating: number;
-  distance: number; // in miles or km
+  distance: number;
+  languages: string[];
+  education: string;
+  experience: string;
+  fees: string;
 }
 
 // Mock function to get user's location
@@ -34,31 +38,69 @@ export const getNearbyDoctors = async (
   const mockDoctors: Doctor[] = [
     {
       id: '1',
-      name: 'Dr. Sarah Johnson',
+      name: 'Dr. Priya Sharma',
       specialty: 'Psychiatrist',
-      address: '123 Wellness Ave, San Francisco, CA 94110',
-      phone: '(415) 555-1234',
+      address: 'Fortis Hospital, Bannerghatta Road, Bangalore 560076',
+      phone: '+91 80 2222 1111',
       rating: 4.8,
       distance: 1.2,
+      languages: ['English', 'Hindi', 'Kannada'],
+      education: 'MBBS, MD Psychiatry - AIIMS Delhi',
+      experience: '15 years',
+      fees: '₹1500'
     },
     {
       id: '2',
-      name: 'Dr. Michael Chen',
+      name: 'Dr. Rajesh Kumar',
       specialty: 'Psychologist',
-      address: '456 Mental Health Blvd, San Francisco, CA 94107',
-      phone: '(415) 555-5678',
+      address: 'Apollo Hospitals, Greams Road, Chennai 600006',
+      phone: '+91 44 2829 3333',
       rating: 4.9,
       distance: 2.5,
+      languages: ['English', 'Tamil', 'Hindi'],
+      education: 'PhD Clinical Psychology - NIMHANS',
+      experience: '12 years',
+      fees: '₹1200'
     },
     {
       id: '3',
-      name: 'Dr. Emily Rodriguez',
+      name: 'Dr. Anjali Desai',
       specialty: 'Therapist',
-      address: '789 Counseling St, San Francisco, CA 94103',
-      phone: '(415) 555-9012',
+      address: 'Max Healthcare, Saket, New Delhi 110017',
+      phone: '+91 11 2651 5555',
       rating: 4.7,
       distance: 3.1,
+      languages: ['English', 'Hindi', 'Gujarati'],
+      education: 'MA Clinical Psychology - Delhi University',
+      experience: '10 years',
+      fees: '₹1000'
     },
+    {
+      id: '4',
+      name: 'Dr. Sanjay Mehta',
+      specialty: 'Psychiatrist',
+      address: 'Kokilaben Hospital, Mumbai 400053',
+      phone: '+91 22 4269 6969',
+      rating: 4.9,
+      distance: 4.2,
+      languages: ['English', 'Hindi', 'Marathi'],
+      education: 'MBBS, DPM - KEM Hospital',
+      experience: '18 years',
+      fees: '₹2000'
+    },
+    {
+      id: '5',
+      name: 'Dr. Meera Reddy',
+      specialty: 'Counselor',
+      address: 'Care Hospitals, Banjara Hills, Hyderabad 500034',
+      phone: '+91 40 2322 4444',
+      rating: 4.6,
+      distance: 2.8,
+      languages: ['English', 'Telugu', 'Hindi'],
+      education: 'MSc Psychology - Osmania University',
+      experience: '8 years',
+      fees: '₹800'
+    }
   ];
 
   // Filter by specialty if specified
@@ -76,10 +118,3 @@ export const getDoctorDetails = async (id: string): Promise<Doctor | null> => {
   const doctors = await getNearbyDoctors();
   return doctors.find((doctor) => doctor.id === id) || null;
 };
-
-// In a real app, this service would include functions to:
-// 1. Get the user's precise location (with permission)
-// 2. Connect to a healthcare provider API
-// 3. Filter results by specialty, distance, availability, etc.
-// 4. Get detailed information about specific providers
-// 5. Possibly handle appointment scheduling
