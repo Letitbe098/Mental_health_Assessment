@@ -105,7 +105,7 @@ const Chatbot: React.FC = () => {
             <div className="bg-pink-200 bg-opacity-70 text-pink-800 p-4 flex items-center justify-between rounded-t-2xl">
               <div className="flex items-center space-x-2">
                 <MessageCircle size={20} className="text-pink-600" />
-                <h3 className="font-medium">MindfulBot</h3>
+                <h3 className="font-medium">Chatty</h3>
               </div>
               <div className="flex items-center space-x-2">
                 <button
