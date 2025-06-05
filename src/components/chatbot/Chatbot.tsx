@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Maximize2, Minimize2 } from "lucide-react";
+import { processChatMessage } from "../services/chatbotService";
 
 type Message = {
   id: string;
@@ -50,29 +51,37 @@ const Chatbot = () => {
     setInput("");
     setIsTyping(true);
 
-    // Replace this with your real OpenAI API call if you want
-    // For now, just simulate a response
-    setTimeout(() => {
+    // Prepare the conversation history for OpenAI
+    const conversation = messages.map(msg => ({
+      role: msg.sender === "user" ? "user" : "assistant",
+      content: msg.text
+    }));
+    conversation.push({ role: "user", content: input });
+
+    try {
+      const reply = await processChatMessage(conversation);
+
       const botMessage: Message = {
         id: Date.now().toString(),
-        text: "Hello! This is a cute chatbot. How can I help you today?",
+        text: reply,
         sender: "bot",
         timestamp: new Date(),
       };
-      addMessage(botMessage);
-      setIsTyping(false);
-    }, 1000);
-  };
 
-  // For real OpenAI integration, replace the above setTimeout with:
-  // const conversation = messages.map(msg => ({
-  //   role: msg.sender === "user" ? "user" : "assistant",
-  //   content: msg.text
-  // }));
-  // conversation.push({ role: "user", content: input });
-  // const reply = await processChatMessage(conversation);
-  // const botMessage = { id: Date.now().toString(), text: reply, sender: "bot", timestamp: new Date() };
-  // addMessage(botMessage);
+      addMessage(botMessage);
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        text: "Oops! I couldn't process your message. Please try again.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      addMessage(errorMessage);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   const toggleMinimize = (e: React.MouseEvent) => {
     e.stopPropagation();
