@@ -1,5 +1,6 @@
 // src/services/chatbotService.ts
 
+// ML helper functions (same as before)
 type Answers = {
   sleep: string;
   appetite: string;
@@ -8,13 +9,14 @@ type Answers = {
   energy: string;
 };
 
-// Convert answer string to 0 or 1
+// Convert answer string to 0 or 1 (assumes positive word means healthy)
 function answerToNum(answer: string, positiveWord: string): number {
   return answer.trim().toLowerCase() === positiveWord.toLowerCase() ? 0 : 1;
 }
 
-// Simple logistic regression prediction
-export function predictRisk(features: number[]): number {
+// Simple logistic regression prediction function
+function predictRisk(features: number[]): number {
+  // Coefficients for 3 classes (Low, Medium, High risk)
   const coefs = [
     [-2.1, -1.9, -3.2, 2.0, 1.5], // Low risk
     [1.0, 0.5, 0.7, -1.1, -0.5],  // Medium risk
@@ -30,14 +32,9 @@ export function predictRisk(features: number[]): number {
   return maxIndex;
 }
 
-// Main function to process chat messages
-export async function processChatMessage(
-  conversation: { role: string; content: string }[]
-): Promise<string> {
-  // For simplicity, we check if user input looks like answers for the 5 questions
-  // We expect answers separated by commas in order: sleep, appetite, sadness, interest, energy
-  // Example user input: "bad, low, yes, no, low"
-
+// The main function exposed to your chatbot component
+export async function processChatMessage(conversation: { role: string; content: string }[]): Promise<string> {
+  // Get last user message text
   const lastUserMessage = conversation
     .filter((msg) => msg.role === "user")
     .slice(-1)[0]?.content
@@ -48,36 +45,44 @@ export async function processChatMessage(
     return "Please tell me about your sleep, appetite, sadness, interest, and energy levels separated by commas.";
   }
 
-  // Try to parse user answers by splitting commas
-  const answersArr = lastUserMessage.split(",").map((ans) => ans.trim());
+  // Detect if user input looks like an assessment response: 5 comma-separated parts
+  const answersArr = lastUserMessage.split(",").map(ans => ans.trim());
 
-  if (answersArr.length !== 5) {
-    return "Please provide 5 answers separated by commas for sleep, appetite, sadness, interest, and energy.";
+  if (answersArr.length === 5) {
+    const answers: Answers = {
+      sleep: answersArr[0],
+      appetite: answersArr[1],
+      sadness: answersArr[2],
+      interest: answersArr[3],
+      energy: answersArr[4],
+    };
+
+    const features = [
+      answerToNum(answers.sleep, "good"),
+      answerToNum(answers.appetite, "normal"),
+      answerToNum(answers.sadness, "no"),
+      answerToNum(answers.interest, "yes"),
+      answerToNum(answers.energy, "normal"),
+    ];
+
+    const riskClass = predictRisk(features);
+
+    const riskMessages = [
+      "Low risk: Keep up your good habits! 😊",
+      "Medium risk: Try mindfulness, exercise, and talking to friends. 🧘‍♂️",
+      "High risk: Consider seeking help from a mental health professional. ❤️‍🩹",
+    ];
+
+    return riskMessages[riskClass];
   }
 
-  const answers: Answers = {
-    sleep: answersArr[0],
-    appetite: answersArr[1],
-    sadness: answersArr[2],
-    interest: answersArr[3],
-    energy: answersArr[4],
-  };
+  // Else fallback to calling your existing OpenAI API function
+  const response = await fetch('/.netlify/functions/fetch-openai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: conversation }),
+  });
+  const data = await response.json();
 
-  const features = [
-    answerToNum(answers.sleep, "good"),
-    answerToNum(answers.appetite, "normal"),
-    answerToNum(answers.sadness, "no"),
-    answerToNum(answers.interest, "yes"),
-    answerToNum(answers.energy, "normal"),
-  ];
-
-  const riskClass = predictRisk(features);
-
-  const riskMessages = [
-    "Low risk: Keep up your good habits! 😊",
-    "Medium risk: Try mindfulness, exercise, and talking to friends. 🧘‍♂️",
-    "High risk: Consider seeking help from a mental health professional. ❤️‍🩹",
-  ];
-
-  return riskMessages[riskClass];
+  return data.reply;
 }
