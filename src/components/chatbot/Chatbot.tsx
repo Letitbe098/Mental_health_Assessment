@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Maximize2, Minimize2 } from "lucide-react";
-import { processChatMessage } from "../services/chatbotService";
+import { processChatMessage } from "services/chatbotService";
 
 type Message = {
   id: string;
