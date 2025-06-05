@@ -1,46 +1,73 @@
-export async function processChatMessage(conversation: { role: string; content: string }[]): Promise<string> {
-  const latestInput = conversation[conversation.length - 1].content.trim();
+type Role = "user" | "bot";
 
-  // Check if user input follows the assessment format
-  const parts = latestInput.split(",").map((p) => p.trim().toLowerCase());
+const questions = [
+  "How has your **sleep** been recently? (good / bad)",
+  "How is your **appetite**? (normal / low)",
+  "Have you been feeling **sad** often? (yes / no)",
+  "Are you still **interested** in things you used to enjoy? (yes / no)",
+  "How is your **energy** level? (normal / low)",
+];
 
-  if (parts.length === 5) {
-    const [sleep, appetite, sadness, interest, energy] = parts;
+const expectedAnswers = [
+  ["good", "bad"],
+  ["normal", "low"],
+  ["yes", "no"],
+  ["yes", "no"],
+  ["normal", "low"],
+];
 
-    let score = 0;
+// Simple scoring keywords
+const scoringMap = [
+  { badWords: ["bad"], score: 1 },
+  { badWords: ["low"], score: 1 },
+  { badWords: ["yes"], score: 1 },
+  { badWords: ["no"], score: 1 },
+  { badWords: ["low"], score: 1 },
+];
 
-    if (["bad", "poor", "not good", "trouble"].includes(sleep)) score++;
-    if (["low", "none", "loss", "poor"].includes(appetite)) score++;
-    if (["yes", "often", "frequent"].includes(sadness)) score++;
-    if (["no", "none", "little"].includes(interest)) score++;
-    if (["low", "tired", "weak"].includes(energy)) score++;
+export async function processChatMessage(
+  conversation: { role: Role; content: string }[]
+): Promise<string> {
+  // Get bot’s memory: answers so far
+  const botMemory = conversation.filter(
+    (msg) => msg.role === "bot" && msg.content.startsWith("Q")
+  ).length;
 
-    if (score <= 1) {
-      return "🟢 Low risk: Keep up your good habits! 😊";
-    } else if (score <= 3) {
-      return "🟠 Medium risk: Try mindfulness, exercise, and talking to friends. 🧘‍♂️";
-    } else {
-      return "🔴 High risk: Consider seeking help from a mental health professional. ❤️‍🩹";
+  const userAnswers = conversation.filter((msg) => msg.role === "user");
+
+  const currentQuestionIndex = userAnswers.length;
+
+  // If not enough answers yet
+  if (currentQuestionIndex < questions.length) {
+    const userInput = conversation[conversation.length - 1].content.trim().toLowerCase();
+    const validOptions = expectedAnswers[currentQuestionIndex];
+
+    // Check if user input is one of the expected values
+    if (!validOptions.includes(userInput)) {
+      return `🤔 I didn't quite get that. Please reply with one of: **${validOptions.join(" / ")}**`;
     }
+
+    // Ask the next question
+    const nextQuestion = questions[currentQuestionIndex];
+    return `Q${currentQuestionIndex + 1}: ${nextQuestion}`;
   }
 
-  // Fallback to OpenAI API if input is not 5-part
-  try {
-    const response = await fetch('/.netlify/functions/fetch-openai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: conversation }),
-    });
+  // All answers are collected — compute risk
+  const answersOnly = userAnswers.map((msg) => msg.content.toLowerCase());
+  let score = 0;
 
-    const data = await response.json();
-
-    if (data?.reply) {
-      return data.reply;
-    } else {
-      throw new Error("No reply from OpenAI");
+  answersOnly.forEach((answer, i) => {
+    const { badWords, score: s } = scoringMap[i];
+    if (badWords.includes(answer)) {
+      score += s;
     }
-  } catch (error) {
-    console.error("Fallback failed:", error);
-    return "🤖 Sorry, I didn't understand that. To assess your mental health, please answer like this:\n\n**good, normal, no, yes, normal**\n\nInclude your sleep, appetite, sadness, interest, and energy — separated by commas.";
+  });
+
+  if (score <= 1) {
+    return "🟢 **Low risk**: You're doing well. Keep up your good habits! 😊";
+  } else if (score <= 3) {
+    return "🟠 **Medium risk**: Consider some mindfulness, physical activity, or talking to someone. 🧘‍♂️";
+  } else {
+    return "🔴 **High risk**: It might help to talk with a mental health professional. You're not alone. ❤️‍🩹";
   }
 }
