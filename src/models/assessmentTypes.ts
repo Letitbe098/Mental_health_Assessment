@@ -44,6 +44,9 @@ export interface AssessmentHistory {
 export type AssessmentType = 'depression' | 'anxiety' | 'stress' | 'sleep' | 'general';
 export type AgeGroup = 'child' | 'teen' | 'adult' | 'senior';
 
+// Export age groups array
+export const ageGroups: AgeGroup[] = ['child', 'teen', 'adult', 'senior'];
+
 // Child-specific depression questions (10 questions)
 export const childDepressionQuestions: AssessmentQuestion[] = [
   {
@@ -411,7 +414,6 @@ export const getTherapeuticRecommendations = (score: number, ageGroup: AgeGroup)
     }
   ];
 
-  // Add age-specific recommendations
   switch (ageGroup) {
     case 'child':
       return [
@@ -479,6 +481,38 @@ export const getTherapeuticRecommendations = (score: number, ageGroup: AgeGroup)
   }
 };
 
+// Get age-specific questions based on assessment type
+export const getAgeSpecificQuestions = (type: AssessmentType, ageGroup: AgeGroup): AssessmentQuestion[] => {
+  if (type === 'depression') {
+    switch (ageGroup) {
+      case 'child':
+        return childDepressionQuestions;
+      case 'teen':
+        return teenDepressionQuestions;
+      case 'adult':
+        return adultDepressionQuestions;
+      case 'senior':
+        return seniorDepressionQuestions;
+      default:
+        return adultDepressionQuestions;
+    }
+  } else if (type === 'anxiety') {
+    switch (ageGroup) {
+      case 'child':
+        return childAnxietyQuestions;
+      case 'teen':
+        return teenAnxietyQuestions;
+      case 'adult':
+        return adultAnxietyQuestions;
+      case 'senior':
+        return seniorAnxietyQuestions;
+      default:
+        return adultAnxietyQuestions;
+    }
+  }
+  return adultDepressionQuestions; // Default fallback
+};
+
 // Interpret assessment results
 export const interpretDepressionResult = (score: number, ageGroup: AgeGroup): AssessmentResult => {
   const recommendations = getTherapeuticRecommendations(score, ageGroup);
@@ -518,5 +552,41 @@ export const interpretDepressionResult = (score: number, ageGroup: AgeGroup): As
   }
 };
 
-// Similar updates needed for anxiety questions and interpretation...
-// (I'll continue with the anxiety-related updates in the next part)
+// Interpret anxiety assessment results
+export const interpretAnxietyResult = (score: number, ageGroup: AgeGroup): AssessmentResult => {
+  const recommendations = getTherapeuticRecommendations(score, ageGroup);
+  
+  if (score <= 9) {
+    return {
+      score,
+      severity: 'minimal',
+      color: '#4A90E2',
+      interpretation: 'Your responses suggest minimal or no anxiety symptoms.',
+      recommendations
+    };
+  } else if (score <= 14) {
+    return {
+      score,
+      severity: 'mild',
+      color: '#50C878',
+      interpretation: 'Your responses suggest mild anxiety symptoms.',
+      recommendations
+    };
+  } else if (score <= 19) {
+    return {
+      score,
+      severity: 'moderate',
+      color: '#F59E0B',
+      interpretation: 'Your responses suggest moderate anxiety symptoms.',
+      recommendations
+    };
+  } else {
+    return {
+      score,
+      severity: 'severe',
+      color: '#EF4444',
+      interpretation: 'Your responses suggest severe anxiety symptoms.',
+      recommendations
+    };
+  }
+};
