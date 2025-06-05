@@ -32,17 +32,32 @@ const Chatbot = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Send welcome message once when chatbot opens
+  // Send welcome messages once when chatbot opens
   useEffect(() => {
     if (isOpen && !initialized) {
       const welcomeMessage: Message = {
-        id: Date.now().toString(),
-        text:
-          "Hi! To assess your mental health, please tell me about your sleep, appetite, sadness, interest, and energy levels separated by commas. For example: good, normal, no, yes, normal",
+        id: (Date.now() + 1).toString(),
+        text: "Hi! Welcome to MindfulBot.",
         sender: "bot",
         timestamp: new Date(),
       };
+
+      const questionMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        text:
+          "To assess your mental health, please answer these questions directly:\n\n" +
+          "1. How is your sleep?\n" +
+          "2. How is your appetite?\n" +
+          "3. Are you feeling sad?\n" +
+          "4. Do you have interest in your activities?\n" +
+          "5. How is your energy level?\n\n" +
+          "Please reply with your answers separated by commas. For example: good, normal, no, yes, normal",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+
       addMessage(welcomeMessage);
+      addMessage(questionMessage);
       setInitialized(true);
     }
   }, [isOpen, initialized, addMessage, setInitialized]);
@@ -176,7 +191,7 @@ const Chatbot = () => {
                               : "bg-pink-100 text-pink-800"
                           } shadow-sm`}
                         >
-                          <p className="text-sm">{message.text}</p>
+                          <p className="text-sm" style={{ whiteSpace: "pre-wrap" }}>{message.text}</p>
                           <p className="text-xs mt-1 opacity-70">
                             {message.timestamp.toLocaleTimeString([], {
                               hour: "2-digit",
