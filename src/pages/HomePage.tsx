@@ -24,7 +24,7 @@ const features = [
 ];
 
 const testimonials = [
-  { quote: 'MindfulCheck helped me understand my anxiety patterns.', author: 'Sarah T.' },
+  { quote: 'Calm Corner helped me understand my anxiety patterns.', author: 'Sarah T.' },
   { quote: 'The mood tracking feature gave me insights into my habits.', author: 'Michael K.' },
   { quote: 'This platform provided a gentle first step toward help.', author: 'Jamie R.' },
 ];
@@ -51,7 +51,7 @@ function HomePage() {
         {/* HEADER */}
         <header style={{ textAlign: 'center', padding: '48px 0 24px 0' }}>
           <h1 style={{ fontSize: 36, margin: 0, color: '#295fa6', fontWeight: 700 }}>
-            MindfulCheck
+            Calm Corner
           </h1>
           <p style={{ color: '#4c5a68', marginTop: 10, fontSize: 18 }}>
             Simple tools for your mental wellbeing.
@@ -204,7 +204,7 @@ function HomePage() {
 
         {/* FOOTER */}
         <footer style={{ textAlign: 'center', color: '#aaa', fontSize: 14, margin: '24px 0 0 0' }}>
-          &copy; {new Date().getFullYear()} MindfulCheck
+          &copy; {new Date().getFullYear()} Calm Corner
         </footer>
       </div>
     </div>
