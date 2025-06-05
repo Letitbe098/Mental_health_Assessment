@@ -9,7 +9,7 @@ import {
   AgeGroup,
   AssessmentQuestion,
   AssessmentResult,
-} from './assessment';
+} from '../models/assessment';
 
 // Simple icon helper (customize as desired)
 const getTherapyIcon = (type: string) => {
