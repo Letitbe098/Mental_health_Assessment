@@ -381,18 +381,15 @@ const AssessmentPage: React.FC = () => {
                             Recommended duration: {recommendation.duration}
                           </p>
                         )}
-                        {recommendation.videoUrl && (
-                          <a
-                            href={recommendation.videoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-primary-600 hover:text-primary-700 mt-2 inline-block"
-                          >
-                            Watch Video Guide
-                          </a>
-                        )}
                       </div>
                     </div>
+                    {recommendation.imageUrl && (
+                      <img 
+                        src={recommendation.imageUrl} 
+                        alt={recommendation.title}
+                        className="w-full h-32 object-cover rounded-lg mt-3"
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -404,7 +401,9 @@ const AssessmentPage: React.FC = () => {
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('nextSteps')}
             >
-              <h3 className="text-xl font-semibold">Next Steps</h3>
+              <h3 className="text-xl font-semibol
+
+d">Next Steps</h3>
               {expandedSection === 'nextSteps' ? (
                 <ChevronUp size={20} className="text-gray-500" />
               ) : (
