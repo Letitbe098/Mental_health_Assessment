@@ -74,7 +74,15 @@ const ResourcesPage = () => {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              {category.icon && <span className="mr-2">{getCategoryIcon(category.icon)}</span>}
+              {category.icon && (
+                <span className="mr-2">
+                  {category.icon === 'FileText' && <FileText className="h-4 w-4" />}
+                  {category.icon === 'Video' && <Video className="h-4 w-4" />}
+                  {category.icon === 'Headphones' && <Headphones className="h-4 w-4" />}
+                  {category.icon === 'BookOpen' && <BookOpen className="h-4 w-4" />}
+                  {category.icon === 'Phone' && <Phone className="h-4 w-4" />}
+                </span>
+              )}
               {category.label}
             </button>
           ))}
