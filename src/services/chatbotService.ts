@@ -1,88 +1,46 @@
-// src/services/chatbotService.ts
-
-// ML helper functions (same as before)
-type Answers = {
-  sleep: string;
-  appetite: string;
-  sadness: string;
-  interest: string;
-  energy: string;
-};
-
-// Convert answer string to 0 or 1 (assumes positive word means healthy)
-function answerToNum(answer: string, positiveWord: string): number {
-  return answer.trim().toLowerCase() === positiveWord.toLowerCase() ? 0 : 1;
-}
-
-// Simple logistic regression prediction function
-function predictRisk(features: number[]): number {
-  // Coefficients for 3 classes (Low, Medium, High risk)
-  const coefs = [
-    [-2.1, -1.9, -3.2, 2.0, 1.5], // Low risk
-    [1.0, 0.5, 0.7, -1.1, -0.5],  // Medium risk
-    [1.1, 1.4, 2.5, -0.9, -1.0],  // High risk
-  ];
-  const intercepts = [-0.3, 0.2, 0.1];
-
-  const scores = coefs.map((coef, idx) =>
-    coef.reduce((sum, c, i) => sum + c * features[i], intercepts[idx])
-  );
-
-  const maxIndex = scores.indexOf(Math.max(...scores));
-  return maxIndex;
-}
-
-// The main function exposed to your chatbot component
 export async function processChatMessage(conversation: { role: string; content: string }[]): Promise<string> {
-  // Get last user message text
-  const lastUserMessage = conversation
-    .filter((msg) => msg.role === "user")
-    .slice(-1)[0]?.content
-    .toLowerCase()
-    .trim();
+  const latestInput = conversation[conversation.length - 1].content.trim();
 
-  if (!lastUserMessage) {
-    return "Please tell me about your sleep, appetite, sadness, interest, and energy levels separated by commas.";
+  // Check if user input follows the assessment format
+  const parts = latestInput.split(",").map((p) => p.trim().toLowerCase());
+
+  if (parts.length === 5) {
+    const [sleep, appetite, sadness, interest, energy] = parts;
+
+    let score = 0;
+
+    if (["bad", "poor", "not good", "trouble"].includes(sleep)) score++;
+    if (["low", "none", "loss", "poor"].includes(appetite)) score++;
+    if (["yes", "often", "frequent"].includes(sadness)) score++;
+    if (["no", "none", "little"].includes(interest)) score++;
+    if (["low", "tired", "weak"].includes(energy)) score++;
+
+    if (score <= 1) {
+      return "🟢 Low risk: Keep up your good habits! 😊";
+    } else if (score <= 3) {
+      return "🟠 Medium risk: Try mindfulness, exercise, and talking to friends. 🧘‍♂️";
+    } else {
+      return "🔴 High risk: Consider seeking help from a mental health professional. ❤️‍🩹";
+    }
   }
 
-  // Detect if user input looks like an assessment response: 5 comma-separated parts
-  const answersArr = lastUserMessage.split(",").map(ans => ans.trim());
+  // Fallback to OpenAI API if input is not 5-part
+  try {
+    const response = await fetch('/.netlify/functions/fetch-openai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: conversation }),
+    });
 
-  if (answersArr.length === 5) {
-    const answers: Answers = {
-      sleep: answersArr[0],
-      appetite: answersArr[1],
-      sadness: answersArr[2],
-      interest: answersArr[3],
-      energy: answersArr[4],
-    };
+    const data = await response.json();
 
-    const features = [
-      answerToNum(answers.sleep, "good"),
-      answerToNum(answers.appetite, "normal"),
-      answerToNum(answers.sadness, "no"),
-      answerToNum(answers.interest, "yes"),
-      answerToNum(answers.energy, "normal"),
-    ];
-
-    const riskClass = predictRisk(features);
-
-    const riskMessages = [
-      "Low risk: Keep up your good habits! 😊",
-      "Medium risk: Try mindfulness, exercise, and talking to friends. 🧘‍♂️",
-      "High risk: Consider seeking help from a mental health professional. ❤️‍🩹",
-    ];
-
-    return riskMessages[riskClass];
+    if (data?.reply) {
+      return data.reply;
+    } else {
+      throw new Error("No reply from OpenAI");
+    }
+  } catch (error) {
+    console.error("Fallback failed:", error);
+    return "🤖 Sorry, I didn't understand that. To assess your mental health, please answer like this:\n\n**good, normal, no, yes, normal**\n\nInclude your sleep, appetite, sadness, interest, and energy — separated by commas.";
   }
-
-  // Else fallback to calling your existing OpenAI API function
-  const response = await fetch('/.netlify/functions/fetch-openai', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages: conversation }),
-  });
-  const data = await response.json();
-
-  return data.reply;
 }
