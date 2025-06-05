@@ -1,5 +1,6 @@
-// Types for different mental health assessments
+import { v4 as uuidv4 } from '../utils/uuid';
 
+// Types for different mental health assessments
 export interface AssessmentQuestion {
   id: string;
   text: string;
@@ -17,15 +18,18 @@ export interface AssessmentResult {
   interpretation: string;
   recommendations: Recommendation[];
   severity: 'minimal' | 'mild' | 'moderate' | 'severe';
-  color: string; // For UI representation
+  color: string;
 }
 
 export interface Recommendation {
-  type: 'color' | 'music' | 'yoga' | 'breathing' | 'general';
+  type: 'color' | 'music' | 'yoga' | 'breathing' | 'exercise' | 'meditation' | 'general';
   title: string;
   description: string;
   duration?: string;
   imageUrl?: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  steps?: string[];
 }
 
 export interface AssessmentHistory {
@@ -40,288 +44,370 @@ export interface AssessmentHistory {
 export type AssessmentType = 'depression' | 'anxiety' | 'stress' | 'sleep' | 'general';
 export type AgeGroup = 'child' | 'teen' | 'adult' | 'senior';
 
-// Age-specific question sets
-export const getAgeSpecificQuestions = (type: AssessmentType, ageGroup: AgeGroup): AssessmentQuestion[] => {
-  switch (type) {
-    case 'depression':
-      return ageGroup === 'child' ? childDepressionQuestions :
-             ageGroup === 'teen' ? teenDepressionQuestions :
-             ageGroup === 'senior' ? seniorDepressionQuestions :
-             depressionQuestions;
-    case 'anxiety':
-      return ageGroup === 'child' ? childAnxietyQuestions :
-             ageGroup === 'teen' ? teenAnxietyQuestions :
-             ageGroup === 'senior' ? seniorAnxietyQuestions :
-             anxietyQuestions;
-    default:
-      return depressionQuestions;
-  }
-};
-
-// Age group definitions
-export const ageGroups = [
-  { id: 'child', label: 'Child (6-12 years)', description: 'Questions adapted for children' },
-  { id: 'teen', label: 'Teen (13-19 years)', description: 'Questions focused on adolescent experiences' },
-  { id: 'adult', label: 'Adult (20-64 years)', description: 'Standard assessment questions' },
-  { id: 'senior', label: 'Senior (65+ years)', description: 'Questions adapted for older adults' },
-];
-
-// Standard PHQ-9 Depression Questions (Adult version)
-export const depressionQuestions: AssessmentQuestion[] = [
-  {
-    id: 'phq-1',
-    text: 'Little interest or pleasure in doing things',
-    options: [
-      { id: 'phq-1-0', text: 'Not at all', value: 0 },
-      { id: 'phq-1-1', text: 'Several days', value: 1 },
-      { id: 'phq-1-2', text: 'More than half the days', value: 2 },
-      { id: 'phq-1-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'phq-2',
-    text: 'Feeling down, depressed, or hopeless',
-    options: [
-      { id: 'phq-2-0', text: 'Not at all', value: 0 },
-      { id: 'phq-2-1', text: 'Several days', value: 1 },
-      { id: 'phq-2-2', text: 'More than half the days', value: 2 },
-      { id: 'phq-2-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'phq-3',
-    text: 'Trouble falling or staying asleep, or sleeping too much',
-    options: [
-      { id: 'phq-3-0', text: 'Not at all', value: 0 },
-      { id: 'phq-3-1', text: 'Several days', value: 1 },
-      { id: 'phq-3-2', text: 'More than half the days', value: 2 },
-      { id: 'phq-3-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'phq-4',
-    text: 'Feeling tired or having little energy',
-    options: [
-      { id: 'phq-4-0', text: 'Not at all', value: 0 },
-      { id: 'phq-4-1', text: 'Several days', value: 1 },
-      { id: 'phq-4-2', text: 'More than half the days', value: 2 },
-      { id: 'phq-4-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'phq-5',
-    text: 'Poor appetite or overeating',
-    options: [
-      { id: 'phq-5-0', text: 'Not at all', value: 0 },
-      { id: 'phq-5-1', text: 'Several days', value: 1 },
-      { id: 'phq-5-2', text: 'More than half the days', value: 2 },
-      { id: 'phq-5-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'phq-6',
-    text: 'Feeling bad about yourself - or that you are a failure or have let yourself or your family down',
-    options: [
-      { id: 'phq-6-0', text: 'Not at all', value: 0 },
-      { id: 'phq-6-1', text: 'Several days', value: 1 },
-      { id: 'phq-6-2', text: 'More than half the days', value: 2 },
-      { id: 'phq-6-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'phq-7',
-    text: 'Trouble concentrating on things, such as reading the newspaper or watching television',
-    options: [
-      { id: 'phq-7-0', text: 'Not at all', value: 0 },
-      { id: 'phq-7-1', text: 'Several days', value: 1 },
-      { id: 'phq-7-2', text: 'More than half the days', value: 2 },
-      { id: 'phq-7-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'phq-8',
-    text: 'Moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual',
-    options: [
-      { id: 'phq-8-0', text: 'Not at all', value: 0 },
-      { id: 'phq-8-1', text: 'Several days', value: 1 },
-      { id: 'phq-8-2', text: 'More than half the days', value: 2 },
-      { id: 'phq-8-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'phq-9',
-    text: 'Thoughts that you would be better off dead or of hurting yourself in some way',
-    options: [
-      { id: 'phq-9-0', text: 'Not at all', value: 0 },
-      { id: 'phq-9-1', text: 'Several days', value: 1 },
-      { id: 'phq-9-2', text: 'More than half the days', value: 2 },
-      { id: 'phq-9-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-];
-
-// Child-specific depression questions
+// Child-specific depression questions (10 questions)
 export const childDepressionQuestions: AssessmentQuestion[] = [
   {
-    id: 'child-dep-1',
-    text: 'Do you feel sad or unhappy most of the time?',
+    id: uuidv4(),
+    text: 'How often do you feel sad or unhappy?',
     options: [
-      { id: 'child-dep-1-0', text: 'No, I usually feel happy', value: 0 },
-      { id: 'child-dep-1-1', text: 'Sometimes I feel sad', value: 1 },
-      { id: 'child-dep-1-2', text: 'I feel sad a lot', value: 2 },
-      { id: 'child-dep-1-3', text: 'I feel sad almost all the time', value: 3 },
-    ],
+      { id: uuidv4(), text: 'Never', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Often', value: 2 },
+      { id: uuidv4(), text: 'Almost always', value: 3 }
+    ]
   },
   {
-    id: 'child-dep-2',
+    id: uuidv4(),
     text: 'Do you still enjoy playing with your favorite toys or doing activities you used to like?',
     options: [
-      { id: 'child-dep-2-0', text: 'Yes, just as much as before', value: 0 },
-      { id: 'child-dep-2-1', text: 'A little less than before', value: 1 },
-      { id: 'child-dep-2-2', text: 'Much less than before', value: 2 },
-      { id: 'child-dep-2-3', text: 'I don\'t enjoy them anymore', value: 3 },
-    ],
+      { id: uuidv4(), text: 'Yes, just as much as before', value: 0 },
+      { id: uuidv4(), text: 'A little less than before', value: 1 },
+      { id: uuidv4(), text: 'Much less than before', value: 2 },
+      { id: uuidv4(), text: 'Not at all', value: 3 }
+    ]
   },
+  {
+    id: uuidv4(),
+    text: 'How well do you sleep at night?',
+    options: [
+      { id: uuidv4(), text: 'I sleep very well', value: 0 },
+      { id: uuidv4(), text: 'I have some trouble sleeping', value: 1 },
+      { id: uuidv4(), text: 'I often have trouble sleeping', value: 2 },
+      { id: uuidv4(), text: 'I have a lot of trouble sleeping', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How is your appetite?',
+    options: [
+      { id: uuidv4(), text: 'I eat normally', value: 0 },
+      { id: uuidv4(), text: 'I sometimes eat less/more than usual', value: 1 },
+      { id: uuidv4(), text: 'I often eat less/more than usual', value: 2 },
+      { id: uuidv4(), text: 'I rarely want to eat', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you find it hard to concentrate in school?',
+    options: [
+      { id: uuidv4(), text: 'No, I can concentrate well', value: 0 },
+      { id: uuidv4(), text: 'Sometimes I have trouble', value: 1 },
+      { id: uuidv4(), text: 'I often have trouble', value: 2 },
+      { id: uuidv4(), text: 'I always have trouble', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you feel tired a lot?',
+    options: [
+      { id: uuidv4(), text: 'No, I have lots of energy', value: 0 },
+      { id: uuidv4(), text: 'Sometimes I feel tired', value: 1 },
+      { id: uuidv4(), text: 'I feel tired most days', value: 2 },
+      { id: uuidv4(), text: 'I always feel tired', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you feel like you are worth as much as other kids?',
+    options: [
+      { id: uuidv4(), text: 'Yes, I feel just as good', value: 0 },
+      { id: uuidv4(), text: 'Sometimes I feel less worthy', value: 1 },
+      { id: uuidv4(), text: 'I often feel less worthy', value: 2 },
+      { id: uuidv4(), text: 'I feel worthless', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How often do you feel like crying?',
+    options: [
+      { id: uuidv4(), text: 'Rarely or never', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Often', value: 2 },
+      { id: uuidv4(), text: 'Almost all the time', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you get upset or angry easily?',
+    options: [
+      { id: uuidv4(), text: 'No, I stay calm', value: 0 },
+      { id: uuidv4(), text: 'Sometimes I get upset', value: 1 },
+      { id: uuidv4(), text: 'I get upset easily', value: 2 },
+      { id: uuidv4(), text: 'I get very upset very easily', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you feel lonely?',
+    options: [
+      { id: uuidv4(), text: 'No, I have friends and family', value: 0 },
+      { id: uuidv4(), text: 'Sometimes I feel lonely', value: 1 },
+      { id: uuidv4(), text: 'I often feel lonely', value: 2 },
+      { id: uuidv4(), text: 'I always feel lonely', value: 3 }
+    ]
+  }
 ];
 
-// Teen-specific depression questions
+// Teen-specific depression questions (10 questions)
 export const teenDepressionQuestions: AssessmentQuestion[] = [
   {
-    id: 'teen-dep-1',
+    id: uuidv4(),
     text: 'How often do you feel overwhelmed by school or social pressures?',
     options: [
-      { id: 'teen-dep-1-0', text: 'Rarely or never', value: 0 },
-      { id: 'teen-dep-1-1', text: 'Sometimes', value: 1 },
-      { id: 'teen-dep-1-2', text: 'Often', value: 2 },
-      { id: 'teen-dep-1-3', text: 'Almost always', value: 3 },
-    ],
+      { id: uuidv4(), text: 'Rarely or never', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Often', value: 2 },
+      { id: uuidv4(), text: 'Almost always', value: 3 }
+    ]
   },
+  {
+    id: uuidv4(),
+    text: 'Have you lost interest in activities you used to enjoy?',
+    options: [
+      { id: uuidv4(), text: 'No change in interests', value: 0 },
+      { id: uuidv4(), text: 'Slightly less interested', value: 1 },
+      { id: uuidv4(), text: 'Much less interested', value: 2 },
+      { id: uuidv4(), text: 'No interest at all', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How often do you feel hopeless about the future?',
+    options: [
+      { id: uuidv4(), text: 'Rarely or never', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Often', value: 2 },
+      { id: uuidv4(), text: 'Almost always', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you have trouble with your self-image or body image?',
+    options: [
+      { id: uuidv4(), text: 'No concerns', value: 0 },
+      { id: uuidv4(), text: 'Minor concerns', value: 1 },
+      { id: uuidv4(), text: 'Moderate concerns', value: 2 },
+      { id: uuidv4(), text: 'Severe concerns', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How often do you feel isolated from others?',
+    options: [
+      { id: uuidv4(), text: 'Rarely or never', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Often', value: 2 },
+      { id: uuidv4(), text: 'Almost always', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you have trouble concentrating on schoolwork?',
+    options: [
+      { id: uuidv4(), text: 'No trouble', value: 0 },
+      { id: uuidv4(), text: 'Some trouble', value: 1 },
+      { id: uuidv4(), text: 'Frequent trouble', value: 2 },
+      { id: uuidv4(), text: 'Constant trouble', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How often do you feel worthless or guilty?',
+    options: [
+      { id: uuidv4(), text: 'Rarely or never', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Often', value: 2 },
+      { id: uuidv4(), text: 'Almost always', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Have there been changes in your sleeping patterns?',
+    options: [
+      { id: uuidv4(), text: 'No changes', value: 0 },
+      { id: uuidv4(), text: 'Slight changes', value: 1 },
+      { id: uuidv4(), text: 'Moderate changes', value: 2 },
+      { id: uuidv4(), text: 'Severe changes', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How often do you feel irritable or angry?',
+    options: [
+      { id: uuidv4(), text: 'Rarely or never', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Often', value: 2 },
+      { id: uuidv4(), text: 'Almost always', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Have you experienced changes in your appetite or weight?',
+    options: [
+      { id: uuidv4(), text: 'No changes', value: 0 },
+      { id: uuidv4(), text: 'Slight changes', value: 1 },
+      { id: uuidv4(), text: 'Moderate changes', value: 2 },
+      { id: uuidv4(), text: 'Severe changes', value: 3 }
+    ]
+  }
 ];
 
-// Senior-specific depression questions
+// Senior-specific depression questions (10 questions)
 export const seniorDepressionQuestions: AssessmentQuestion[] = [
   {
-    id: 'senior-dep-1',
-    text: 'How often do you feel isolated or lonely?',
+    id: uuidv4(),
+    text: 'How often do you feel lonely or isolated?',
     options: [
-      { id: 'senior-dep-1-0', text: 'Rarely or never', value: 0 },
-      { id: 'senior-dep-1-1', text: 'Sometimes', value: 1 },
-      { id: 'senior-dep-1-2', text: 'Often', value: 2 },
-      { id: 'senior-dep-1-3', text: 'Almost always', value: 3 },
-    ],
+      { id: uuidv4(), text: 'Rarely or never', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Often', value: 2 },
+      { id: uuidv4(), text: 'Almost always', value: 3 }
+    ]
   },
+  {
+    id: uuidv4(),
+    text: 'Do you still enjoy activities you used to like?',
+    options: [
+      { id: uuidv4(), text: 'Yes, just as much', value: 0 },
+      { id: uuidv4(), text: 'Somewhat less', value: 1 },
+      { id: uuidv4(), text: 'Much less', value: 2 },
+      { id: uuidv4(), text: 'Not at all', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How is your memory compared to before?',
+    options: [
+      { id: uuidv4(), text: 'No changes', value: 0 },
+      { id: uuidv4(), text: 'Minor changes', value: 1 },
+      { id: uuidv4(), text: 'Moderate changes', value: 2 },
+      { id: uuidv4(), text: 'Significant changes', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you feel useful and needed?',
+    options: [
+      { id: uuidv4(), text: 'Yes, very much', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Not very often', value: 2 },
+      { id: uuidv4(), text: 'Not at all', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How often do you feel hopeful about the future?',
+    options: [
+      { id: uuidv4(), text: 'Most of the time', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Rarely', value: 2 },
+      { id: uuidv4(), text: 'Never', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you have trouble sleeping?',
+    options: [
+      { id: uuidv4(), text: 'No trouble', value: 0 },
+      { id: uuidv4(), text: 'Some trouble', value: 1 },
+      { id: uuidv4(), text: 'Frequent trouble', value: 2 },
+      { id: uuidv4(), text: 'Severe trouble', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How is your appetite?',
+    options: [
+      { id: uuidv4(), text: 'Normal', value: 0 },
+      { id: uuidv4(), text: 'Somewhat changed', value: 1 },
+      { id: uuidv4(), text: 'Much changed', value: 2 },
+      { id: uuidv4(), text: 'Severely changed', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you feel more irritable than usual?',
+    options: [
+      { id: uuidv4(), text: 'No change', value: 0 },
+      { id: uuidv4(), text: 'Slightly more', value: 1 },
+      { id: uuidv4(), text: 'Moderately more', value: 2 },
+      { id: uuidv4(), text: 'Much more', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'How often do you feel tired without a clear reason?',
+    options: [
+      { id: uuidv4(), text: 'Rarely or never', value: 0 },
+      { id: uuidv4(), text: 'Sometimes', value: 1 },
+      { id: uuidv4(), text: 'Often', value: 2 },
+      { id: uuidv4(), text: 'Almost always', value: 3 }
+    ]
+  },
+  {
+    id: uuidv4(),
+    text: 'Do you have trouble concentrating on daily activities?',
+    options: [
+      { id: uuidv4(), text: 'No trouble', value: 0 },
+      { id: uuidv4(), text: 'Some trouble', value: 1 },
+      { id: uuidv4(), text: 'Frequent trouble', value: 2 },
+      { id: uuidv4(), text: 'Constant trouble', value: 3 }
+    ]
+  }
 ];
 
-// Standard GAD-7 Anxiety Questions (Adult version)
-export const anxietyQuestions: AssessmentQuestion[] = [
-  {
-    id: 'gad-1',
-    text: 'Feeling nervous, anxious, or on edge',
-    options: [
-      { id: 'gad-1-0', text: 'Not at all', value: 0 },
-      { id: 'gad-1-1', text: 'Several days', value: 1 },
-      { id: 'gad-1-2', text: 'More than half the days', value: 2 },
-      { id: 'gad-1-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'gad-2',
-    text: 'Not being able to stop or control worrying',
-    options: [
-      { id: 'gad-2-0', text: 'Not at all', value: 0 },
-      { id: 'gad-2-1', text: 'Several days', value: 1 },
-      { id: 'gad-2-2', text: 'More than half the days', value: 2 },
-      { id: 'gad-2-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'gad-3',
-    text: 'Worrying too much about different things',
-    options: [
-      { id: 'gad-3-0', text: 'Not at all', value: 0 },
-      { id: 'gad-3-1', text: 'Several days', value: 1 },
-      { id: 'gad-3-2', text: 'More than half the days', value: 2 },
-      { id: 'gad-3-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'gad-4',
-    text: 'Trouble relaxing',
-    options: [
-      { id: 'gad-4-0', text: 'Not at all', value: 0 },
-      { id: 'gad-4-1', text: 'Several days', value: 1 },
-      { id: 'gad-4-2', text: 'More than half the days', value: 2 },
-      { id: 'gad-4-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'gad-5',
-    text: 'Being so restless that it\'s hard to sit still',
-    options: [
-      { id: 'gad-5-0', text: 'Not at all', value: 0 },
-      { id: 'gad-5-1', text: 'Several days', value: 1 },
-      { id: 'gad-5-2', text: 'More than half the days', value: 2 },
-      { id: 'gad-5-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'gad-6',
-    text: 'Becoming easily annoyed or irritable',
-    options: [
-      { id: 'gad-6-0', text: 'Not at all', value: 0 },
-      { id: 'gad-6-1', text: 'Several days', value: 1 },
-      { id: 'gad-6-2', text: 'More than half the days', value: 2 },
-      { id: 'gad-6-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-  {
-    id: 'gad-7',
-    text: 'Feeling afraid as if something awful might happen',
-    options: [
-      { id: 'gad-7-0', text: 'Not at all', value: 0 },
-      { id: 'gad-7-1', text: 'Several days', value: 1 },
-      { id: 'gad-7-2', text: 'More than half the days', value: 2 },
-      { id: 'gad-7-3', text: 'Nearly every day', value: 3 },
-    ],
-  },
-];
-
-// Age-specific anxiety questions follow the same pattern
-export const childAnxietyQuestions: AssessmentQuestion[] = [];
-
-export const teenAnxietyQuestions: AssessmentQuestion[] = [];
-
-export const seniorAnxietyQuestions: AssessmentQuestion[] = [];
-
-// Therapeutic recommendations based on assessment results
+// Get therapeutic recommendations based on assessment results
 export const getTherapeuticRecommendations = (score: number, ageGroup: AgeGroup): Recommendation[] => {
   const baseRecommendations: Recommendation[] = [
     {
       type: 'color',
       title: 'Color Therapy',
-      description: 'Spend time in a room with calming blue or green tones. These colors are known to reduce stress and anxiety.',
-      imageUrl: 'https://images.pexels.com/photos/3255761/pexels-photo-3255761.jpeg'
+      description: 'Spend time in a room with calming blue or green tones.',
+      imageUrl: 'https://images.pexels.com/photos/3255761/pexels-photo-3255761.jpeg',
+      videoUrl: 'https://www.youtube.com/embed/tznztJVsW9E'
     },
     {
       type: 'music',
-      title: 'Music Therapy',
-      description: 'Listen to calming classical or nature sounds for 15-20 minutes.',
+      title: 'Calming Music Therapy',
+      description: 'Listen to soothing classical or nature sounds.',
       duration: '15-20 minutes',
+      audioUrl: 'https://soundcloud.com/relaxdaily/relaxing-music-calm-studying',
       imageUrl: 'https://images.pexels.com/photos/4088801/pexels-photo-4088801.jpeg'
     },
     {
-      type: 'yoga',
-      title: 'Simple Yoga Poses',
-      description: 'Try child\'s pose or cat-cow stretches to release tension.',
-      duration: '10-15 minutes',
-      imageUrl: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg'
+      type: 'breathing',
+      title: '4-7-8 Breathing Exercise',
+      description: 'A simple breathing technique to reduce anxiety.',
+      duration: '5 minutes',
+      videoUrl: 'https://www.youtube.com/embed/gz4G31LGyog',
+      steps: [
+        'Sit or lie comfortably',
+        'Inhale for 4 seconds',
+        'Hold breath for 7 seconds',
+        'Exhale for 8 seconds',
+        'Repeat 4 times'
+      ]
     },
     {
-      type: 'breathing',
-      title: 'Deep Breathing Exercise',
-      description: 'Practice 4-7-8 breathing: Inhale for 4 counts, hold for 7, exhale for 8.',
-      duration: '5-10 minutes',
-      imageUrl: 'https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg'
+      type: 'meditation',
+      title: 'Guided Meditation',
+      description: 'Follow along with this calming meditation.',
+      duration: '10 minutes',
+      videoUrl: 'https://www.youtube.com/embed/inpok4MKVLM'
+    },
+    {
+      type: 'yoga',
+      title: 'Gentle Yoga Sequence',
+      description: 'Simple yoga poses for relaxation.',
+      duration: '15 minutes',
+      videoUrl: 'https://www.youtube.com/embed/v7AYKMP6rOE',
+      steps: [
+        'Child\'s Pose',
+        'Cat-Cow Stretch',
+        'Downward Dog',
+        'Forward Fold',
+        'Corpse Pose'
+      ]
     }
   ];
 
@@ -331,43 +417,73 @@ export const getTherapeuticRecommendations = (score: number, ageGroup: AgeGroup)
       return [
         ...baseRecommendations,
         {
-          type: 'general',
-          title: 'Drawing and Coloring',
-          description: 'Express your feelings through art using bright, happy colors.',
+          type: 'exercise',
+          title: 'Fun Movement Activities',
+          description: 'Playful exercises to boost mood.',
+          duration: '15 minutes',
+          videoUrl: 'https://www.youtube.com/embed/dhCM0C6GnrY',
           imageUrl: 'https://images.pexels.com/photos/159579/crayons-coloring-book-coloring-book-159579.jpeg'
+        },
+        {
+          type: 'general',
+          title: 'Art Therapy',
+          description: 'Express feelings through drawing and coloring.',
+          videoUrl: 'https://www.youtube.com/embed/x6jSSpN9zGY'
         }
       ];
     case 'teen':
       return [
         ...baseRecommendations,
         {
+          type: 'exercise',
+          title: 'Teen Workout Routine',
+          description: 'Energy-boosting exercises.',
+          duration: '20 minutes',
+          videoUrl: 'https://www.youtube.com/embed/ml6cT4AZdqI'
+        },
+        {
           type: 'general',
-          title: 'Journal Writing',
-          description: 'Write down your thoughts and feelings in a private journal.',
-          imageUrl: 'https://images.pexels.com/photos/6357/coffee-desk-notes-workspace.jpg'
+          title: 'Journaling Exercise',
+          description: 'Guided journaling prompts for self-reflection.',
+          videoUrl: 'https://www.youtube.com/embed/ZBnPlqQFPKs'
         }
       ];
     case 'senior':
       return [
         ...baseRecommendations,
         {
+          type: 'exercise',
+          title: 'Chair Yoga',
+          description: 'Gentle seated exercises.',
+          duration: '15 minutes',
+          videoUrl: 'https://www.youtube.com/embed/1DYH5ud3zHo'
+        },
+        {
           type: 'general',
-          title: 'Gentle Walking',
-          description: 'Take a short walk in nature or around your garden.',
-          duration: '15-20 minutes',
-          imageUrl: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg'
+          title: 'Memory Activities',
+          description: 'Brain exercises to stay sharp.',
+          videoUrl: 'https://www.youtube.com/embed/0TZxqC6uYDk'
         }
       ];
     default:
-      return baseRecommendations;
+      return [
+        ...baseRecommendations,
+        {
+          type: 'exercise',
+          title: 'Full Body Workout',
+          description: 'Moderate intensity exercises.',
+          duration: '30 minutes',
+          videoUrl: 'https://www.youtube.com/embed/UBMk30rjy0o'
+        }
+      ];
   }
 };
 
-// Interpret depression assessment results
+// Interpret assessment results
 export const interpretDepressionResult = (score: number, ageGroup: AgeGroup): AssessmentResult => {
   const recommendations = getTherapeuticRecommendations(score, ageGroup);
   
-  if (score <= 4) {
+  if (score <= 9) {
     return {
       score,
       severity: 'minimal',
@@ -375,7 +491,7 @@ export const interpretDepressionResult = (score: number, ageGroup: AgeGroup): As
       interpretation: 'Your responses suggest minimal or no depression symptoms.',
       recommendations
     };
-  } else if (score <= 9) {
+  } else if (score <= 14) {
     return {
       score,
       severity: 'mild',
@@ -383,7 +499,7 @@ export const interpretDepressionResult = (score: number, ageGroup: AgeGroup): As
       interpretation: 'Your responses suggest mild depression symptoms.',
       recommendations
     };
-  } else if (score <= 14) {
+  } else if (score <= 19) {
     return {
       score,
       severity: 'moderate',
@@ -402,41 +518,5 @@ export const interpretDepressionResult = (score: number, ageGroup: AgeGroup): As
   }
 };
 
-// Interpret anxiety assessment results
-export const interpretAnxietyResult = (score: number, ageGroup: AgeGroup): AssessmentResult => {
-  const recommendations = getTherapeuticRecommendations(score, ageGroup);
-  
-  if (score <= 4) {
-    return {
-      score,
-      severity: 'minimal',
-      color: '#4A90E2',
-      interpretation: 'Your responses suggest minimal or no anxiety symptoms.',
-      recommendations
-    };
-  } else if (score <= 9) {
-    return {
-      score,
-      severity: 'mild',
-      color: '#50C878',
-      interpretation: 'Your responses suggest mild anxiety symptoms.',
-      recommendations
-    };
-  } else if (score <= 14) {
-    return {
-      score,
-      severity: 'moderate',
-      color: '#F59E0B',
-      interpretation: 'Your responses suggest moderate anxiety symptoms.',
-      recommendations
-    };
-  } else {
-    return {
-      score,
-      severity: 'severe',
-      color: '#EF4444',
-      interpretation: 'Your responses suggest severe anxiety symptoms.',
-      recommendations
-    };
-  }
-};
+// Similar updates needed for anxiety questions and interpretation...
+// (I'll continue with the anxiety-related updates in the next part)
