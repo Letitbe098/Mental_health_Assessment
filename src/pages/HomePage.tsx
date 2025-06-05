@@ -25,79 +25,133 @@ function HomePage() {
         backgroundImage: `url(${backgroundImageUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '32px 8px',
+        padding: 0,
+        margin: 0,
+        fontFamily: 'sans-serif',
       }}
     >
+      {/* Soft overlay for readability */}
       <div
         style={{
-          background: 'rgba(255,255,255,0.95)',
-          borderRadius: 18,
-          boxShadow: '0 6px 32px rgba(44,62,80,0.12)',
-          maxWidth: 650,
-          width: '100%',
-          padding: '36px 28px',
-          margin: '32px 0',
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.82) 60%, rgba(200,220,255,0.60) 100%)',
+          padding: '0',
         }}
       >
-        <header style={{ textAlign: 'center', marginBottom: 32 }}>
-          <h1 style={{ fontSize: 32, margin: 0, color: '#2e4a62' }}>MindfulCheck</h1>
-          <p style={{ color: '#555', marginTop: 8 }}>Simple tools for your mental wellbeing.</p>
-          <div style={{ marginTop: 16 }}>
-            <Link to="/register" style={{ marginRight: 12, textDecoration: 'none', color: '#1976d2' }}>
+        {/* HEADER */}
+        <header style={{ textAlign: 'center', padding: '48px 0 24px 0' }}>
+          <h1 style={{ fontSize: 36, margin: 0, color: '#295fa6', fontWeight: 700 }}>
+            MindfulCheck
+          </h1>
+          <p style={{ color: '#4c5a68', marginTop: 10, fontSize: 18 }}>
+            Simple tools for your mental wellbeing.
+          </p>
+          <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center', gap: 18 }}>
+            <Link
+              to="/register"
+              style={{
+                background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
+                color: '#fff',
+                padding: '12px 32px',
+                borderRadius: 30,
+                fontWeight: 600,
+                fontSize: 17,
+                boxShadow: '0 2px 8px rgba(33,147,176,0.13)',
+                textDecoration: 'none',
+                transition: 'background 0.2s',
+              }}
+            >
               Get Started
             </Link>
-            <Link to="/assessment" style={{ textDecoration: 'none', color: '#1976d2' }}>
+            <Link
+              to="/assessment"
+              style={{
+                background: 'linear-gradient(90deg, #f7971e 0%, #ffd200 100%)',
+                color: '#333',
+                padding: '12px 32px',
+                borderRadius: 30,
+                fontWeight: 600,
+                fontSize: 17,
+                boxShadow: '0 2px 8px rgba(255,210,0,0.10)',
+                textDecoration: 'none',
+                transition: 'background 0.2s',
+              }}
+            >
               Take Assessment
             </Link>
           </div>
         </header>
 
-        <section style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 22, borderBottom: '1px solid #eee', paddingBottom: 8 }}>Features</h2>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+        {/* FEATURES */}
+        <section style={{ maxWidth: 800, margin: '40px auto 0 auto', padding: '0 16px' }}>
+          <h2 style={{ fontSize: 22, color: '#295fa6', marginBottom: 18, fontWeight: 600 }}>
+            Features
+          </h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 20,
+          }}>
             {features.map((feature, idx) => (
-              <li key={idx} style={{ margin: '16px 0', padding: 12, background: '#f7fafc', borderRadius: 6 }}>
-                <strong>{feature.title}</strong>
-                <div style={{ color: '#555', marginTop: 4 }}>{feature.description}</div>
-              </li>
+              <div
+                key={idx}
+                style={{
+                  background: 'rgba(255,255,255,0.82)',
+                  borderRadius: 12,
+                  padding: 18,
+                  boxShadow: '0 1px 6px rgba(33,147,176,0.06)',
+                  minHeight: 110,
+                }}
+              >
+                <strong style={{ color: '#2193b0', fontSize: 16 }}>{feature.title}</strong>
+                <div style={{ color: '#4c5a68', marginTop: 6 }}>{feature.description}</div>
+              </div>
             ))}
-          </ul>
+          </div>
         </section>
 
-        <section style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 22, borderBottom: '1px solid #eee', paddingBottom: 8 }}>How It Works</h2>
-          <ol style={{ paddingLeft: 20 }}>
+        {/* HOW IT WORKS */}
+        <section style={{ maxWidth: 800, margin: '40px auto 0 auto', padding: '0 16px' }}>
+          <h2 style={{ fontSize: 22, color: '#295fa6', marginBottom: 18, fontWeight: 600 }}>
+            How It Works
+          </h2>
+          <ol style={{ color: '#4c5a68', fontSize: 16, paddingLeft: 24 }}>
             <li>Complete Assessment</li>
             <li>Get Personalized Insights</li>
             <li>Track Progress & Connect</li>
           </ol>
         </section>
 
-        <section style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 22, borderBottom: '1px solid #eee', paddingBottom: 8 }}>Testimonials</h2>
-          {testimonials.map((t, idx) => (
-            <blockquote
-              key={idx}
-              style={{
-                borderLeft: '4px solid #1976d2',
-                margin: '16px 0',
-                paddingLeft: 12,
-                color: '#333',
-                background: '#f5faff',
-                borderRadius: 6,
-              }}
-            >
-              "{t.quote}"
-              <br />
-              <span style={{ fontSize: 14, color: '#888' }}>– {t.author}</span>
-            </blockquote>
-          ))}
+        {/* TESTIMONIALS */}
+        <section style={{ maxWidth: 800, margin: '40px auto', padding: '0 16px' }}>
+          <h2 style={{ fontSize: 22, color: '#295fa6', marginBottom: 18, fontWeight: 600 }}>
+            Testimonials
+          </h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
+            {testimonials.map((t, idx) => (
+              <blockquote
+                key={idx}
+                style={{
+                  flex: '1 1 240px',
+                  borderLeft: '4px solid #2193b0',
+                  margin: 0,
+                  padding: '12px 18px',
+                  color: '#333',
+                  background: 'rgba(245,250,255,0.9)',
+                  borderRadius: 10,
+                  minWidth: 220,
+                }}
+              >
+                "{t.quote}"
+                <br />
+                <span style={{ fontSize: 14, color: '#888' }}>– {t.author}</span>
+              </blockquote>
+            ))}
+          </div>
         </section>
 
-        <footer style={{ textAlign: 'center', color: '#aaa', fontSize: 14, marginTop: 24 }}>
+        {/* FOOTER */}
+        <footer style={{ textAlign: 'center', color: '#aaa', fontSize: 14, margin: '24px 0 0 0' }}>
           &copy; {new Date().getFullYear()} MindfulCheck
         </footer>
       </div>
