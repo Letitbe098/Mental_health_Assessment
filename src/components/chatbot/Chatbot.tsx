@@ -10,19 +10,19 @@ type Message = {
   timestamp: Date;
 };
 
-// Mock useChatbot hook for this example
 const useChatbot = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [initialized, setInitialized] = useState(false); // Track if welcome message sent
 
   const toggleChatbot = () => setIsOpen(!isOpen);
   const addMessage = (msg: Message) => setMessages((msgs) => [...msgs, msg]);
 
-  return { isOpen, toggleChatbot, messages, addMessage };
+  return { isOpen, toggleChatbot, messages, addMessage, initialized, setInitialized };
 };
 
 const Chatbot = () => {
-  const { isOpen, toggleChatbot, messages, addMessage } = useChatbot();
+  const { isOpen, toggleChatbot, messages, addMessage, initialized, setInitialized } = useChatbot();
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -31,6 +31,21 @@ const Chatbot = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Send welcome message once when chatbot opens
+  useEffect(() => {
+    if (isOpen && !initialized) {
+      const welcomeMessage: Message = {
+        id: Date.now().toString(),
+        text:
+          "Hi! To assess your mental health, please tell me about your sleep, appetite, sadness, interest, and energy levels separated by commas. For example: good, normal, no, yes, normal",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      addMessage(welcomeMessage);
+      setInitialized(true);
+    }
+  }, [isOpen, initialized, addMessage, setInitialized]);
 
   useEffect(() => {
     if (isOpen) scrollToBottom();
@@ -51,10 +66,10 @@ const Chatbot = () => {
     setInput("");
     setIsTyping(true);
 
-    // Prepare the conversation history for OpenAI
-    const conversation = messages.map(msg => ({
+    // Prepare conversation history for chatbotService
+    const conversation = messages.map((msg) => ({
       role: msg.sender === "user" ? "user" : "assistant",
-      content: msg.text
+      content: msg.text,
     }));
     conversation.push({ role: "user", content: input });
 
@@ -70,7 +85,7 @@ const Chatbot = () => {
 
       addMessage(botMessage);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
       const errorMessage: Message = {
         id: Date.now().toString(),
         text: "Oops! I couldn't process your message. Please try again.",
@@ -88,7 +103,6 @@ const Chatbot = () => {
     setIsMinimized(!isMinimized);
   };
 
-  // Replace with your own image path
   const backgroundImageUrl = "/images/cute-background.jpg";
 
   return (
@@ -203,9 +217,9 @@ const Chatbot = () => {
                     <button
                       type="submit"
                       disabled={!input.trim()}
-                      className="p-2 rounded-2xl bg-pink-500 text-white disabled:opacity-50 hover:bg-pink-600 transition-colors focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      className="p-2 rounded-2xl bg-pink-500 text-white hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Send size={18} />
+                      <Send size={20} />
                     </button>
                   </div>
                 </form>
