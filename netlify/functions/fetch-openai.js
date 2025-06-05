@@ -13,7 +13,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: messages, // Send the full conversation history
+        messages: messages,
         max_tokens: 200
       })
     });
