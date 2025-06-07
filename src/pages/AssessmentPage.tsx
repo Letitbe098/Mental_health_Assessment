@@ -106,7 +106,7 @@ const AssessmentPage: React.FC = () => {
 
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestion Index(prev => prev - 1);
+      setCurrentQuestionIndex(prev => prev - 1);
     }
   };
 
