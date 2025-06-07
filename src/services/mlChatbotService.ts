@@ -30,54 +30,54 @@ class MLChatbotService {
     moodHistory: [],
     preferences: []
   };
+  private currentQuestionIndex = 0;
+  private isInAssessmentMode = false;
+  private userResponses: string[] = [];
 
   // Mental health keywords and their weights
   private mentalHealthKeywords = {
-    anxiety: ['anxious', 'worried', 'nervous', 'panic', 'fear', 'stress', 'overwhelmed'],
-    depression: ['sad', 'depressed', 'hopeless', 'empty', 'worthless', 'tired', 'exhausted'],
-    positive: ['happy', 'good', 'great', 'excellent', 'wonderful', 'amazing', 'fantastic'],
-    negative: ['bad', 'terrible', 'awful', 'horrible', 'worst', 'hate', 'angry'],
+    // Positive emotions
+    positive: {
+      high: ['amazing', 'fantastic', 'excellent', 'wonderful', 'great', 'awesome', 'perfect', 'brilliant'],
+      medium: ['good', 'fine', 'okay', 'alright', 'decent', 'nice', 'well', 'better'],
+      low: ['so-so', 'meh', 'average', 'neutral']
+    },
+    // Negative emotions
+    negative: {
+      high: ['terrible', 'awful', 'horrible', 'devastating', 'miserable', 'hopeless', 'suicidal', 'worthless'],
+      medium: ['bad', 'sad', 'depressed', 'anxious', 'worried', 'stressed', 'upset', 'down'],
+      low: ['not good', 'not great', 'could be better', 'struggling', 'tired', 'overwhelmed']
+    },
+    // Specific conditions
+    anxiety: ['anxious', 'worried', 'nervous', 'panic', 'fear', 'stress', 'overwhelmed', 'restless'],
+    depression: ['sad', 'depressed', 'hopeless', 'empty', 'worthless', 'tired', 'exhausted', 'numb'],
     help: ['help', 'support', 'advice', 'guidance', 'assistance', 'therapy', 'counseling'],
-    crisis: ['suicide', 'kill', 'die', 'end', 'hurt', 'harm', 'emergency']
+    crisis: ['suicide', 'kill', 'die', 'end', 'hurt', 'harm', 'emergency', 'can\'t go on']
   };
 
-  // Response templates based on intent and sentiment
-  private responseTemplates = {
-    greeting: [
-      "Hello! I'm here to support you on your mental health journey. How are you feeling today?",
-      "Hi there! I'm glad you're here. What's on your mind today?",
-      "Welcome! I'm your mental health companion. How can I help you feel better today?"
-    ],
-    anxiety: [
-      "I understand you're feeling anxious. That's completely normal. Let's try a quick breathing exercise together. Take a deep breath in for 4 counts... hold for 4... and out for 6. How does that feel?",
-      "Anxiety can be overwhelming, but you're not alone. Can you tell me what's triggering these feelings? Sometimes talking about it helps.",
-      "I hear that you're feeling anxious. Here's a grounding technique: name 5 things you can see, 4 things you can touch, 3 things you can hear, 2 things you can smell, and 1 thing you can taste."
-    ],
-    depression: [
-      "I'm sorry you're feeling this way. Depression is real and challenging, but there is hope. Have you been able to do any small activities that usually bring you comfort?",
-      "Thank you for sharing that with me. It takes courage to talk about depression. What's one small thing that felt good today, even if it was tiny?",
-      "I understand you're going through a difficult time. Remember that your feelings are valid, and seeking help is a sign of strength, not weakness."
-    ],
-    positive: [
-      "That's wonderful to hear! I'm so glad you're feeling good. What's contributing to these positive feelings?",
-      "It's great that you're in a good space right now. Would you like to talk about what's been helping you feel this way?",
-      "I love hearing that! Positive moments are so important. How can we help you maintain this feeling?"
-    ],
-    crisis: [
-      "I'm very concerned about what you've shared. Your life has value and meaning. Please reach out to a crisis helpline immediately: National Suicide Prevention Lifeline: 988 or Crisis Text Line: Text HOME to 741741. Are you in immediate danger?",
-      "Thank you for trusting me with this. You're not alone, and there are people who want to help. Please contact emergency services (911) or a crisis hotline right away. Can someone stay with you right now?"
-    ],
-    help_seeking: [
-      "I'm glad you're looking for help - that's a positive step! Based on our conversation, I think talking to a mental health professional could be really beneficial. Would you like me to help you find resources in your area?",
-      "Seeking help shows real strength. There are many types of support available - therapy, support groups, medication if needed. What kind of help feels most comfortable to you right now?",
-      "You've taken an important step by reaching out. Professional support can make a huge difference. Would you like information about different types of mental health professionals?"
-    ],
-    general: [
-      "I'm here to listen. Can you tell me more about what you're experiencing?",
-      "Thank you for sharing that with me. How long have you been feeling this way?",
-      "I want to understand better. What's been the most challenging part of your day?"
-    ]
-  };
+  // Wellbeing assessment questions
+  private wellbeingQuestions = [
+    {
+      question: "Hi! I'm here to support you. How are you feeling today?",
+      quickResponses: ["Very good", "Good", "Okay", "Not good", "Very bad"]
+    },
+    {
+      question: "How has your sleep been lately?",
+      quickResponses: ["Very good", "Good", "Poor", "Very poor", "Can't sleep"]
+    },
+    {
+      question: "How are your energy levels?",
+      quickResponses: ["High energy", "Normal", "Low energy", "Exhausted", "No energy"]
+    },
+    {
+      question: "Are you feeling anxious or worried about anything?",
+      quickResponses: ["Not at all", "A little", "Somewhat", "Very anxious", "Extremely anxious"]
+    },
+    {
+      question: "How connected do you feel to others right now?",
+      quickResponses: ["Very connected", "Connected", "Somewhat isolated", "Very isolated", "Completely alone"]
+    }
+  ];
 
   async initialize() {
     if (this.isInitialized) return;
@@ -108,6 +108,19 @@ class MLChatbotService {
 
     // Add mental health keywords
     Object.values(this.mentalHealthKeywords).flat().forEach(word => {
+      if (typeof word === 'string' && !commonWords.includes(word)) {
+        commonWords.push(word);
+      }
+    });
+
+    // Add positive and negative keywords
+    Object.values(this.mentalHealthKeywords.positive).flat().forEach(word => {
+      if (!commonWords.includes(word)) {
+        commonWords.push(word);
+      }
+    });
+
+    Object.values(this.mentalHealthKeywords.negative).flat().forEach(word => {
       if (!commonWords.includes(word)) {
         commonWords.push(word);
       }
@@ -137,52 +150,41 @@ class MLChatbotService {
     });
   }
 
-  private preprocessText(text: string): number[] {
-    const words = text.toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .split(/\s+/)
-      .filter(word => word.length > 0);
-
-    const vector = new Array(this.vocabulary.size).fill(0);
-    
-    words.forEach(word => {
-      const index = this.vocabulary.get(word);
-      if (index !== undefined) {
-        vector[index] = 1;
-      }
-    });
-
-    return vector;
-  }
-
   private analyzeSentiment(text: string): { sentiment: number; confidence: number } {
-    const vector = this.preprocessText(text);
-    
-    // Simple rule-based sentiment analysis as fallback
-    let positiveScore = 0;
-    let negativeScore = 0;
-    
-    const words = text.toLowerCase().split(/\s+/);
-    
-    words.forEach(word => {
-      if (this.mentalHealthKeywords.positive.includes(word)) {
-        positiveScore += 1;
-      } else if (this.mentalHealthKeywords.negative.includes(word) || 
-                 this.mentalHealthKeywords.anxiety.includes(word) ||
-                 this.mentalHealthKeywords.depression.includes(word)) {
-        negativeScore += 1;
-      }
+    const lowerText = text.toLowerCase();
+    let sentimentScore = 0;
+    let confidence = 0.5;
+
+    // Check for positive words
+    Object.entries(this.mentalHealthKeywords.positive).forEach(([level, words]) => {
+      words.forEach(word => {
+        if (lowerText.includes(word)) {
+          switch (level) {
+            case 'high': sentimentScore += 1.0; confidence = 0.9; break;
+            case 'medium': sentimentScore += 0.6; confidence = 0.8; break;
+            case 'low': sentimentScore += 0.3; confidence = 0.7; break;
+          }
+        }
+      });
     });
 
-    const totalScore = positiveScore + negativeScore;
-    if (totalScore === 0) {
-      return { sentiment: 0, confidence: 0.5 }; // neutral
-    }
+    // Check for negative words
+    Object.entries(this.mentalHealthKeywords.negative).forEach(([level, words]) => {
+      words.forEach(word => {
+        if (lowerText.includes(word)) {
+          switch (level) {
+            case 'high': sentimentScore -= 1.0; confidence = 0.9; break;
+            case 'medium': sentimentScore -= 0.6; confidence = 0.8; break;
+            case 'low': sentimentScore -= 0.3; confidence = 0.7; break;
+          }
+        }
+      });
+    });
 
-    const sentiment = (positiveScore - negativeScore) / totalScore;
-    const confidence = Math.min(totalScore / words.length * 2, 1);
+    // Normalize sentiment to -1 to 1 range
+    sentimentScore = Math.max(-1, Math.min(1, sentimentScore));
 
-    return { sentiment, confidence };
+    return { sentiment: sentimentScore, confidence };
   }
 
   private detectIntent(text: string): string {
@@ -194,7 +196,7 @@ class MLChatbotService {
     }
 
     // Greeting detection
-    if (/^(hi|hello|hey|good morning|good afternoon|good evening)/.test(lowerText)) {
+    if (/^(hi|hello|hey|good morning|good afternoon|good evening)/.test(lowerText) && !this.isInAssessmentMode) {
       return 'greeting';
     }
 
@@ -213,57 +215,96 @@ class MLChatbotService {
       return 'depression';
     }
 
-    // Positive sentiment
-    if (this.mentalHealthKeywords.positive.some(word => lowerText.includes(word))) {
-      return 'positive';
+    // Assessment response
+    if (this.isInAssessmentMode) {
+      return 'assessment_response';
     }
 
     return 'general';
   }
 
-  private getPersonalizedResponse(intent: string, sentiment: number, userText: string): string {
-    const templates = this.responseTemplates[intent] || this.responseTemplates.general;
-    let response = templates[Math.floor(Math.random() * templates.length)];
+  private getEmpatheticResponse(sentiment: number, userText: string): string {
+    const lowerText = userText.toLowerCase();
 
-    // Add personalization based on user profile
-    if (this.userProfile.name) {
-      response = response.replace(/^(Hi|Hello|Hey)/, `Hi ${this.userProfile.name}`);
+    // Very negative responses
+    if (sentiment <= -0.7) {
+      const responses = [
+        "I'm really sorry you're going through such a difficult time. Your feelings are completely valid, and I want you to know that you're not alone.",
+        "That sounds incredibly hard. Thank you for sharing this with me - it takes courage to open up about difficult feelings.",
+        "I can hear that you're really struggling right now. Please know that what you're feeling matters, and there are people who want to help."
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
     }
 
-    // Add context from previous conversations
-    if (this.conversationContext.length > 0) {
-      const lastContext = this.conversationContext[this.conversationContext.length - 1];
-      if (lastContext.includes('anxiety') && intent === 'general') {
-        response += " I remember you mentioned feeling anxious earlier. How are those feelings now?";
-      } else if (lastContext.includes('depression') && intent === 'positive') {
-        response += " I'm really glad to hear you're feeling better than when we last talked.";
-      }
+    // Moderately negative responses
+    if (sentiment <= -0.3) {
+      const responses = [
+        "I understand you're not feeling great right now. It's okay to have difficult days - they're part of being human.",
+        "Thank you for being honest about how you're feeling. Sometimes just acknowledging our struggles is the first step.",
+        "I hear that things are tough for you right now. Would you like to talk about what's been weighing on your mind?"
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
     }
 
-    return response;
+    // Neutral responses
+    if (sentiment >= -0.3 && sentiment <= 0.3) {
+      const responses = [
+        "It sounds like you're in a neutral space right now. How would you like to feel instead?",
+        "I appreciate you sharing where you're at. Sometimes 'okay' is perfectly fine too.",
+        "Thank you for checking in. Is there anything specific you'd like to talk about today?"
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    // Positive responses
+    if (sentiment > 0.3) {
+      const responses = [
+        "I'm so glad to hear you're feeling good! That's wonderful. What's been contributing to these positive feelings?",
+        "It's great that you're in a good space right now. I'd love to hear more about what's been going well for you.",
+        "That's fantastic to hear! Positive moments are so important. What's been the highlight of your day?"
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    return "Thank you for sharing that with me. How can I best support you today?";
   }
 
-  private generateFollowUpQuestions(intent: string): string[] {
+  private generateQuickResponses(questionIndex: number): string[] {
+    if (questionIndex < this.wellbeingQuestions.length) {
+      return this.wellbeingQuestions[questionIndex].quickResponses;
+    }
+    return [];
+  }
+
+  private generateFollowUpQuestions(intent: string, sentiment: number): string[] {
+    if (this.isInAssessmentMode && this.currentQuestionIndex < this.wellbeingQuestions.length) {
+      return this.generateQuickResponses(this.currentQuestionIndex);
+    }
+
     const followUps = {
       anxiety: [
-        "What situations tend to trigger your anxiety?",
-        "Have you tried any coping strategies that help?",
-        "Would you like to learn some relaxation techniques?"
+        "What usually helps when you feel this way?",
+        "Would you like to try a breathing exercise?",
+        "Can you tell me more about what's causing the anxiety?"
       ],
       depression: [
-        "How has your sleep been lately?",
-        "Are you able to do activities you usually enjoy?",
-        "Do you have people you can talk to about how you're feeling?"
+        "How long have you been feeling this way?",
+        "What activities used to bring you joy?",
+        "Do you have support from friends or family?"
       ],
       positive: [
-        "What's been the highlight of your day?",
-        "How can we help you maintain these positive feelings?",
-        "Would you like to set any goals for tomorrow?"
+        "What's been the best part of your day?",
+        "How can we help you maintain these good feelings?",
+        "Would you like to set any positive intentions?"
       ],
-      general: [
-        "Can you tell me more about what's on your mind?",
-        "How long have you been feeling this way?",
-        "What would help you feel better right now?"
+      general: sentiment < 0 ? [
+        "Would you like to talk more about what's bothering you?",
+        "What would help you feel a little better right now?",
+        "Is there anything specific that's been on your mind?"
+      ] : [
+        "What's been on your mind lately?",
+        "How can I best support you today?",
+        "Is there anything you'd like to explore together?"
       ]
     };
 
@@ -289,16 +330,47 @@ class MLChatbotService {
     // Update conversation context
     this.conversationContext.push(userMessage);
     if (this.conversationContext.length > 10) {
-      this.conversationContext.shift(); // Keep only last 10 messages
+      this.conversationContext.shift();
     }
 
-    // Generate personalized response
-    const response = this.getPersonalizedResponse(intent, sentiment, userMessage);
-    
-    // Generate follow-up questions
-    const followUpQuestions = this.generateFollowUpQuestions(intent);
+    let response = "";
+    let followUpQuestions: string[] = [];
 
-    // Generate recommendations based on intent and sentiment
+    // Handle different intents
+    if (intent === 'crisis') {
+      response = "I'm very concerned about what you've shared. Your life has value and meaning. Please reach out to a crisis helpline immediately:\n\n🆘 National Suicide Prevention Lifeline: 988\n📱 Crisis Text Line: Text HOME to 741741\n🚨 Emergency Services: 911\n\nAre you in immediate danger? Please don't hesitate to reach out for help.";
+      followUpQuestions = ["I need immediate help", "I'm safe for now", "I want to talk to someone"];
+    } else if (intent === 'greeting' && conversationHistory.length <= 1) {
+      // Start wellbeing assessment
+      this.isInAssessmentMode = true;
+      this.currentQuestionIndex = 0;
+      response = this.wellbeingQuestions[0].question;
+      followUpQuestions = this.wellbeingQuestions[0].quickResponses;
+    } else if (intent === 'assessment_response' && this.isInAssessmentMode) {
+      // Store the response
+      this.userResponses.push(userMessage);
+      
+      // Move to next question or finish assessment
+      this.currentQuestionIndex++;
+      
+      if (this.currentQuestionIndex < this.wellbeingQuestions.length) {
+        // Ask next question
+        const nextQuestion = this.wellbeingQuestions[this.currentQuestionIndex];
+        response = `Thank you for sharing that. ${nextQuestion.question}`;
+        followUpQuestions = nextQuestion.quickResponses;
+      } else {
+        // Assessment complete
+        this.isInAssessmentMode = false;
+        response = this.generateAssessmentSummary();
+        followUpQuestions = this.generateFollowUpQuestions('general', sentiment);
+      }
+    } else {
+      // Generate empathetic response based on sentiment
+      response = this.getEmpatheticResponse(sentiment, userMessage);
+      followUpQuestions = this.generateFollowUpQuestions(intent, sentiment);
+    }
+
+    // Generate recommendations
     const recommendations = this.generateRecommendations(intent, sentiment);
 
     return {
@@ -311,6 +383,39 @@ class MLChatbotService {
     };
   }
 
+  private generateAssessmentSummary(): string {
+    const responses = this.userResponses;
+    let summary = "Thank you for sharing your feelings with me. Based on what you've told me:\n\n";
+    
+    // Analyze overall sentiment from responses
+    let overallSentiment = 0;
+    responses.forEach(response => {
+      const { sentiment } = this.analyzeSentiment(response);
+      overallSentiment += sentiment;
+    });
+    overallSentiment /= responses.length;
+
+    if (overallSentiment <= -0.5) {
+      summary += "It sounds like you're going through a challenging time right now. That's completely understandable, and I want you to know that your feelings are valid. ";
+      summary += "Consider reaching out to a mental health professional who can provide personalized support. ";
+      summary += "In the meantime, please be gentle with yourself and remember that difficult feelings are temporary.";
+    } else if (overallSentiment <= 0) {
+      summary += "You seem to be managing some ups and downs, which is very normal. ";
+      summary += "It might be helpful to focus on small self-care activities and maintaining connections with supportive people in your life.";
+    } else {
+      summary += "It's wonderful to hear that you're feeling relatively well! ";
+      summary += "Keep doing what's working for you, and remember that maintaining good mental health is an ongoing process.";
+    }
+
+    summary += "\n\nI'm here whenever you need someone to talk to. How would you like to continue our conversation?";
+    
+    // Reset for next assessment
+    this.userResponses = [];
+    this.currentQuestionIndex = 0;
+    
+    return summary;
+  }
+
   private generateRecommendations(intent: string, sentiment: number): string[] {
     const recommendations = [];
 
@@ -318,7 +423,7 @@ class MLChatbotService {
       recommendations.push(
         "Try the 4-7-8 breathing technique",
         "Consider taking our anxiety assessment",
-        "Practice progressive muscle relaxation"
+        "Practice grounding exercises"
       );
     } else if (intent === 'depression') {
       recommendations.push(
@@ -353,6 +458,9 @@ class MLChatbotService {
 
   clearConversationContext() {
     this.conversationContext = [];
+    this.isInAssessmentMode = false;
+    this.currentQuestionIndex = 0;
+    this.userResponses = [];
   }
 }
 
