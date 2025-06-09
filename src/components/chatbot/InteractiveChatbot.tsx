@@ -71,9 +71,14 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
 
       setMessages([welcomeMessage]);
       setFollowUpQuestions([
-        "How has your day been so far?",
-        "What's been on your mind lately?",
-        "Is there anything specific you'd like to talk about?"
+        "Very good",
+        "Good", 
+        "Okay",
+        "Not so good",
+        "Bad",
+        "Very bad",
+        "Terrible",
+        "Awful"
       ]);
       setIsInitialized(true);
     } catch (error) {
@@ -205,14 +210,19 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
         {isOpen && (
           <motion.div
             className="fixed bottom-24 right-6 z-50 w-96 rounded-2xl shadow-2xl overflow-hidden flex flex-col bg-white border border-gray-200"
-            style={{ height: isMinimized ? "auto" : "600px" }}
+            style={{ 
+              height: isMinimized ? "auto" : "600px",
+              maxHeight: "calc(100vh - 120px)", // Ensure it doesn't exceed viewport height
+              top: "auto",
+              bottom: "100px" // Fixed position from bottom
+            }}
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-4 flex items-center justify-between">
+            {/* Header - Always visible and sticky */}
+            <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-4 flex items-center justify-between flex-shrink-0 sticky top-0 z-10">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
                   <Bot size={18} />
@@ -242,8 +252,8 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
 
             {!isMinimized && (
               <>
-                {/* Messages */}
-                <div className="flex-grow p-4 overflow-y-auto bg-gray-50">
+                {/* Messages - Scrollable area with proper padding */}
+                <div className="flex-grow p-4 overflow-y-auto bg-gray-50 min-h-0" style={{ maxHeight: "400px" }}>
                   {messages.map((message) => (
                     <motion.div
                       key={message.id}
@@ -255,7 +265,7 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
                       <div className={`flex items-start space-x-2 max-w-[85%] ${
                         message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""
                       }`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                           message.sender === "user" 
                             ? "bg-primary-500 text-white" 
                             : "bg-white border-2 border-primary-200 text-primary-600"
@@ -317,12 +327,12 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
 
                 {/* Quick Actions */}
                 {(followUpQuestions.length > 0 || currentRecommendations.length > 0) && (
-                  <div className="p-3 bg-white border-t border-gray-200">
+                  <div className="p-3 bg-white border-t border-gray-200 flex-shrink-0">
                     {followUpQuestions.length > 0 && (
                       <div className="mb-3">
                         <p className="text-xs text-gray-500 mb-2">Quick responses:</p>
                         <div className="flex flex-wrap gap-2">
-                          {followUpQuestions.slice(0, 2).map((question, index) => (
+                          {followUpQuestions.slice(0, 4).map((question, index) => (
                             <button
                               key={index}
                               onClick={() => handleQuickResponse(question)}
@@ -357,13 +367,13 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
                   </div>
                 )}
 
-                {/* Input */}
+                {/* Input - Always at bottom */}
                 <form 
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleSendMessage();
                   }} 
-                  className="border-t border-gray-200 p-3 bg-white"
+                  className="border-t border-gray-200 p-3 bg-white flex-shrink-0"
                 >
                   <div className="flex items-center space-x-2">
                     <input

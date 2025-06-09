@@ -39,15 +39,15 @@ class MLChatbotService {
   private mentalHealthKeywords = {
     // Positive emotions
     positive: {
-      high: ['amazing', 'fantastic', 'excellent', 'wonderful', 'great', 'awesome', 'perfect', 'brilliant', 'outstanding', 'incredible'],
+      high: ['amazing', 'fantastic', 'excellent', 'wonderful', 'great', 'awesome', 'perfect', 'brilliant', 'outstanding', 'incredible', 'very good'],
       medium: ['good', 'fine', 'okay', 'alright', 'decent', 'nice', 'well', 'better', 'positive', 'happy'],
       low: ['so-so', 'meh', 'average', 'neutral', 'fair']
     },
-    // Negative emotions
+    // Negative emotions - FIXED SENTIMENT ANALYSIS
     negative: {
-      high: ['terrible', 'awful', 'horrible', 'devastating', 'miserable', 'hopeless', 'suicidal', 'worthless', 'unbearable', 'crushing'],
-      medium: ['bad', 'sad', 'depressed', 'anxious', 'worried', 'stressed', 'upset', 'down', 'low', 'struggling'],
-      low: ['not good', 'not great', 'could be better', 'tired', 'overwhelmed', 'frustrated', 'disappointed']
+      high: ['terrible', 'awful', 'horrible', 'devastating', 'miserable', 'hopeless', 'suicidal', 'worthless', 'unbearable', 'crushing', 'very bad', 'worst', 'extremely bad'],
+      medium: ['bad', 'sad', 'depressed', 'anxious', 'worried', 'stressed', 'upset', 'down', 'low', 'struggling', 'not good', 'not so good', 'poor', 'rough'],
+      low: ['not great', 'could be better', 'tired', 'overwhelmed', 'frustrated', 'disappointed', 'meh', 'blah']
     },
     // Specific conditions
     anxiety: ['anxious', 'worried', 'nervous', 'panic', 'fear', 'stress', 'overwhelmed', 'restless', 'tense', 'on edge'],
@@ -57,11 +57,11 @@ class MLChatbotService {
     sharing: ['share', 'tell', 'talk about', 'explain', 'describe', 'open up', 'confide', 'express']
   };
 
-  // Enhanced wellbeing assessment questions with ML-driven follow-ups
+  // Enhanced wellbeing assessment questions with comprehensive quick responses
   private wellbeingQuestions = [
     {
       question: "Hi! I'm here to support you through whatever you're going through. How are you feeling today?",
-      quickResponses: ["Very good", "Good", "Okay", "Not so good", "Bad", "Very bad"],
+      quickResponses: ["Excellent", "Very good", "Good", "Okay", "Not so good", "Bad", "Very bad", "Terrible"],
       followUpQuestions: {
         positive: ["That's wonderful to hear! What's been contributing to these good feelings?"],
         negative: ["I'm sorry you're not feeling well. Would you mind sharing what's been troubling you? I'd like to help."],
@@ -70,7 +70,7 @@ class MLChatbotService {
     },
     {
       question: "Thank you for sharing that with me. How has your sleep been lately?",
-      quickResponses: ["Very good", "Good", "Okay", "Poor", "Very poor", "Can't sleep"],
+      quickResponses: ["Excellent", "Very good", "Good", "Okay", "Poor", "Very poor", "Terrible", "Can't sleep"],
       followUpQuestions: {
         positive: ["Good sleep is so important for our wellbeing. What helps you sleep well?"],
         negative: ["Sleep troubles can really affect how we feel. What's been keeping you awake?"],
@@ -79,7 +79,7 @@ class MLChatbotService {
     },
     {
       question: "I appreciate you being open with me. How are your energy levels throughout the day?",
-      quickResponses: ["High energy", "Normal", "Low energy", "Exhausted", "No energy", "Varies a lot"],
+      quickResponses: ["Very high", "High energy", "Normal", "Low energy", "Very low", "Exhausted", "No energy", "Drained"],
       followUpQuestions: {
         positive: ["It's great that you have good energy! What activities energize you most?"],
         negative: ["Low energy can be really challenging. When do you feel most drained?"],
@@ -88,7 +88,7 @@ class MLChatbotService {
     },
     {
       question: "You're doing great by talking about this. Are you feeling anxious or worried about anything specific?",
-      quickResponses: ["Not at all", "A little", "Somewhat", "Very anxious", "Extremely anxious", "Constantly worried"],
+      quickResponses: ["Not at all", "Very little", "A little", "Somewhat", "Very anxious", "Extremely anxious", "Constantly worried", "Panicking"],
       followUpQuestions: {
         positive: ["I'm glad you're feeling calm. What helps you maintain that peace of mind?"],
         negative: ["Anxiety can be overwhelming. Would you like to tell me more about what's causing these worries?"],
@@ -97,7 +97,7 @@ class MLChatbotService {
     },
     {
       question: "Thank you for trusting me with your feelings. How connected do you feel to the people around you?",
-      quickResponses: ["Very connected", "Connected", "Somewhat isolated", "Very isolated", "Completely alone", "It's complicated"],
+      quickResponses: ["Very connected", "Connected", "Somewhat connected", "Somewhat isolated", "Very isolated", "Completely alone", "It's complicated", "No one understands"],
       followUpQuestions: {
         positive: ["Strong connections are so valuable. Who are the people that matter most to you?"],
         negative: ["Feeling isolated can be really painful. I want you to know that you're not alone in this conversation with me."],
@@ -230,7 +230,7 @@ class MLChatbotService {
       });
     });
 
-    // Check for negative words with intensity
+    // Check for negative words with intensity - FIXED
     Object.entries(this.mentalHealthKeywords.negative).forEach(([level, words]) => {
       words.forEach(word => {
         if (lowerText.includes(word)) {
@@ -319,7 +319,7 @@ class MLChatbotService {
       return response;
     }
 
-    // Very negative responses with immediate support
+    // FIXED: Very negative responses with immediate support
     if (sentiment <= -0.7) {
       this.conversationState = 'supporting';
       const supportingResponses = this.empatheticResponses.supporting;
@@ -330,7 +330,7 @@ class MLChatbotService {
       return response;
     }
 
-    // Moderately negative responses with gentle inquiry
+    // FIXED: Moderately negative responses with gentle inquiry
     if (sentiment <= -0.3) {
       this.conversationState = 'listening';
       const responses = [
@@ -382,7 +382,10 @@ class MLChatbotService {
         "I need some encouragement",
         "What can I do to feel better?",
         "I want to try an assessment",
-        "I'm not ready to talk more"
+        "I'm not ready to talk more",
+        "Things are really hard",
+        "I feel hopeless",
+        "I need help"
       ];
     }
 
@@ -391,7 +394,10 @@ class MLChatbotService {
       "I'm feeling better now",
       "I need some advice",
       "Can you help me?",
-      "I'd like to try something"
+      "I'd like to try something",
+      "I'm struggling",
+      "Things are tough",
+      "I feel okay"
     ];
   }
 
@@ -405,36 +411,60 @@ class MLChatbotService {
         "What usually helps when you feel anxious?",
         "Would you like to try a breathing exercise?",
         "Can you tell me more about what triggers your anxiety?",
-        "How long have you been feeling this way?"
+        "How long have you been feeling this way?",
+        "I feel very anxious",
+        "I'm panicking",
+        "I can't calm down",
+        "I'm overwhelmed"
       ],
       depression: [
         "How long have you been feeling this way?",
         "What activities used to bring you joy?",
         "Do you have support from friends or family?",
-        "Would you like to talk about what's been hardest?"
+        "Would you like to talk about what's been hardest?",
+        "I feel very sad",
+        "I feel hopeless",
+        "Nothing interests me",
+        "I'm exhausted"
       ],
       sharing: [
         "Thank you for opening up to me",
         "That sounds really difficult",
         "You're being so brave by sharing this",
-        "How can I best support you right now?"
+        "How can I best support you right now?",
+        "It's been really hard",
+        "I don't know what to do",
+        "I feel lost",
+        "I need support"
       ],
       positive: [
         "What's been the best part of your day?",
         "How can we help you maintain these good feelings?",
         "Would you like to set any positive intentions?",
-        "What's been working well for you?"
+        "What's been working well for you?",
+        "I'm feeling great",
+        "Things are going well",
+        "I'm happy today",
+        "Life is good"
       ],
       general: sentiment < 0 ? [
         "Would you like to talk more about what's bothering you?",
         "What would help you feel a little better right now?",
         "I'm here to listen to whatever you need to share",
-        "You don't have to go through this alone"
+        "You don't have to go through this alone",
+        "I'm struggling",
+        "Things are hard",
+        "I feel bad",
+        "I need help"
       ] : [
         "What's been on your mind lately?",
         "How can I best support you today?",
         "Is there anything you'd like to explore together?",
-        "What would be most helpful for you right now?"
+        "What would be most helpful for you right now?",
+        "I'm doing okay",
+        "Things are fine",
+        "I feel alright",
+        "I'm managing"
       ]
     };
 
