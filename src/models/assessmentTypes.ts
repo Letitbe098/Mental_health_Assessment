@@ -640,7 +640,7 @@ export const interpretDepressionResult = async (
     interpretation = 'Severe depressive symptoms identified. Our AI strongly recommends immediate professional mental health support and comprehensive treatment planning.';
   }
 
-  // Enhanced recommendations with ML prioritization
+  // Enhanced recommendations with comprehensive wellness activities
   const recs = {
     child: {
       mild: [
@@ -658,6 +658,20 @@ export const interpretDepressionResult = async (
           description: 'Engage in age-appropriate physical activities to boost mood.',
           duration: '15-30 min',
           priority: 2,
+        },
+        {
+          type: 'art',
+          title: 'Color Therapy Art Activities',
+          description: 'Use bright colors and creative art to express emotions and improve mood.',
+          duration: '20 min',
+          priority: 3,
+        },
+        {
+          type: 'nature',
+          title: 'Nature Walks and Outdoor Play',
+          description: 'Spend time outdoors in nature to boost mood and energy.',
+          duration: '30 min',
+          priority: 4,
         },
       ],
       moderate: [
@@ -678,10 +692,17 @@ export const interpretDepressionResult = async (
           priority: 2,
         },
         {
+          type: 'yoga',
+          title: 'Kids Yoga for Emotional Balance',
+          description: 'Gentle yoga poses designed for children to improve mood.',
+          duration: '15 min',
+          priority: 3,
+        },
+        {
           type: 'support',
           title: 'Talk to a Trusted Adult',
           description: 'It\'s important to share feelings with parents, teachers, or counselors.',
-          priority: 3,
+          priority: 4,
         },
       ],
       severe: [
@@ -718,10 +739,24 @@ export const interpretDepressionResult = async (
           priority: 2,
         },
         {
+          type: 'exercise',
+          title: 'Teen Fitness and Movement',
+          description: 'Age-appropriate exercises to boost mood and energy.',
+          duration: '20-30 min',
+          priority: 3,
+        },
+        {
+          type: 'art',
+          title: 'Creative Expression Therapy',
+          description: 'Use art, music, or writing to express and process emotions.',
+          duration: '30 min',
+          priority: 4,
+        },
+        {
           type: 'social',
           title: 'Peer Support Strategies',
           description: 'Learn how to build and maintain supportive friendships.',
-          priority: 3,
+          priority: 5,
         },
       ],
       moderate: [
@@ -744,6 +779,13 @@ export const interpretDepressionResult = async (
           title: 'Teen Mindfulness Practices',
           description: 'Age-appropriate mindfulness and meditation techniques.',
           priority: 3,
+        },
+        {
+          type: 'walking',
+          title: 'Daily Walking Routine',
+          description: 'Establish a daily walking habit to improve mood and physical health.',
+          duration: '20-30 min',
+          priority: 4,
         },
       ],
       severe: [
@@ -782,10 +824,31 @@ export const interpretDepressionResult = async (
           priority: 2,
         },
         {
+          type: 'walking',
+          title: 'Nature Walking Therapy',
+          description: 'Regular walks in nature to improve mood and reduce stress.',
+          duration: '30-45 min',
+          priority: 3,
+        },
+        {
+          type: 'yoga',
+          title: 'Gentle Yoga for Depression',
+          description: 'Yoga sequences specifically designed for mood improvement.',
+          duration: '20-30 min',
+          priority: 4,
+        },
+        {
+          type: 'color',
+          title: 'Color Therapy and Art',
+          description: 'Use color therapy and creative arts to improve emotional wellbeing.',
+          duration: '15-20 min',
+          priority: 5,
+        },
+        {
           type: 'lifestyle',
           title: 'Sleep Hygiene Improvement',
           description: 'Optimize your sleep schedule and environment for better mental health.',
-          priority: 3,
+          priority: 6,
         },
       ],
       moderate: [
@@ -804,10 +867,24 @@ export const interpretDepressionResult = async (
           priority: 2,
         },
         {
+          type: 'exercise',
+          title: 'Structured Exercise Program',
+          description: 'Regular cardio and strength training to combat depression.',
+          duration: '30-45 min',
+          priority: 3,
+        },
+        {
+          type: 'walking',
+          title: 'Daily Walking Meditation',
+          description: 'Combine walking with mindfulness for dual benefits.',
+          duration: '20-30 min',
+          priority: 4,
+        },
+        {
           type: 'support',
           title: 'Support Group Participation',
           description: 'Connect with others experiencing similar challenges.',
-          priority: 3,
+          priority: 5,
         },
       ],
       severe: [
@@ -844,10 +921,24 @@ export const interpretDepressionResult = async (
           priority: 1,
         },
         {
+          type: 'walking',
+          title: 'Gentle Walking Program',
+          description: 'Safe, enjoyable walking routines for seniors.',
+          duration: '15-20 min',
+          priority: 2,
+        },
+        {
+          type: 'art',
+          title: 'Senior Art Therapy',
+          description: 'Creative activities designed for older adults.',
+          duration: '30 min',
+          priority: 3,
+        },
+        {
           type: 'social',
           title: 'Social Engagement Activities',
           description: 'Strategies to maintain social connections and community involvement.',
-          priority: 2,
+          priority: 4,
         },
       ],
       moderate: [
@@ -860,10 +951,17 @@ export const interpretDepressionResult = async (
           priority: 1,
         },
         {
+          type: 'yoga',
+          title: 'Chair Yoga for Seniors',
+          description: 'Gentle yoga that can be done sitting or standing.',
+          duration: '15-20 min',
+          priority: 2,
+        },
+        {
           type: 'support',
           title: 'Family and Community Support',
           description: 'Engage family members and community resources.',
-          priority: 2,
+          priority: 3,
         },
       ],
       severe: [
@@ -963,7 +1061,7 @@ export const interpretAnxietyResult = async (
     interpretation = 'Severe anxiety symptoms identified. Our AI strongly recommends immediate professional mental health support and comprehensive anxiety treatment.';
   }
 
-  // Enhanced anxiety recommendations with ML prioritization
+  // Enhanced anxiety recommendations with comprehensive wellness activities
   const recs = {
     child: {
       mild: [
@@ -975,6 +1073,20 @@ export const interpretAnxietyResult = async (
           duration: '5 min',
           priority: 1,
         },
+        {
+          type: 'color',
+          title: 'Calming Color Activities',
+          description: 'Use soothing colors and art to reduce anxiety.',
+          duration: '15 min',
+          priority: 2,
+        },
+        {
+          type: 'nature',
+          title: 'Peaceful Nature Time',
+          description: 'Spend quiet time in nature to reduce anxiety.',
+          duration: '20 min',
+          priority: 3,
+        },
       ],
       moderate: [
         {
@@ -984,6 +1096,13 @@ export const interpretAnxietyResult = async (
           videoUrl: 'https://www.youtube.com/embed/1KaOrSuWZeM',
           duration: '8 min',
           priority: 1,
+        },
+        {
+          type: 'yoga',
+          title: 'Calming Kids Yoga',
+          description: 'Gentle yoga poses to reduce anxiety in children.',
+          duration: '10 min',
+          priority: 2,
         },
       ],
       severe: [
@@ -1005,6 +1124,20 @@ export const interpretAnxietyResult = async (
           duration: '12 min',
           priority: 1,
         },
+        {
+          type: 'exercise',
+          title: 'Anxiety-Relief Exercise',
+          description: 'Physical activities that help reduce teen anxiety.',
+          duration: '20-30 min',
+          priority: 2,
+        },
+        {
+          type: 'walking',
+          title: 'Mindful Walking Practice',
+          description: 'Combine walking with mindfulness to reduce anxiety.',
+          duration: '15-20 min',
+          priority: 3,
+        },
       ],
       moderate: [
         {
@@ -1014,6 +1147,13 @@ export const interpretAnxietyResult = async (
           videoUrl: 'https://www.youtube.com/embed/4pLUleLdwY4',
           duration: '15 min',
           priority: 1,
+        },
+        {
+          type: 'breathing',
+          title: 'Advanced Breathing Techniques',
+          description: 'Learn powerful breathing methods for anxiety control.',
+          duration: '10 min',
+          priority: 2,
         },
       ],
       severe: [
@@ -1035,6 +1175,27 @@ export const interpretAnxietyResult = async (
           duration: '7 min',
           priority: 1,
         },
+        {
+          type: 'walking',
+          title: 'Anxiety-Reducing Walks',
+          description: 'Regular walking routine to manage anxiety naturally.',
+          duration: '20-30 min',
+          priority: 2,
+        },
+        {
+          type: 'yoga',
+          title: 'Calming Yoga Flow',
+          description: 'Gentle yoga sequences for anxiety relief.',
+          duration: '15-20 min',
+          priority: 3,
+        },
+        {
+          type: 'color',
+          title: 'Color Therapy for Anxiety',
+          description: 'Use color therapy techniques to promote calm.',
+          duration: '10-15 min',
+          priority: 4,
+        },
       ],
       moderate: [
         {
@@ -1044,6 +1205,19 @@ export const interpretAnxietyResult = async (
           videoUrl: 'https://www.youtube.com/embed/O-6f5wQXSu8',
           duration: '10 min',
           priority: 1,
+        },
+        {
+          type: 'exercise',
+          title: 'Anxiety-Busting Workouts',
+          description: 'Structured exercise routines to reduce anxiety.',
+          duration: '30-45 min',
+          priority: 2,
+        },
+        {
+          type: 'therapy',
+          title: 'CBT for Anxiety',
+          description: 'Cognitive behavioral therapy techniques for anxiety.',
+          priority: 3,
         },
       ],
       severe: [
@@ -1065,6 +1239,13 @@ export const interpretAnxietyResult = async (
           duration: '10 min',
           priority: 1,
         },
+        {
+          type: 'walking',
+          title: 'Gentle Walking for Calm',
+          description: 'Peaceful walking routines for seniors.',
+          duration: '15-20 min',
+          priority: 2,
+        },
       ],
       moderate: [
         {
@@ -1074,6 +1255,13 @@ export const interpretAnxietyResult = async (
           videoUrl: 'https://www.youtube.com/embed/6fbM6D5eYuw',
           duration: '10 min',
           priority: 1,
+        },
+        {
+          type: 'breathing',
+          title: 'Senior Breathing Exercises',
+          description: 'Gentle breathing techniques for older adults.',
+          duration: '5-10 min',
+          priority: 2,
         },
       ],
       severe: [
