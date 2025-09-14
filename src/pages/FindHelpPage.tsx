@@ -10,7 +10,11 @@ import {
   Filter, 
   Sliders, 
   ChevronDown,
-  ExternalLink
+  ExternalLink,
+  GraduationCap,
+  Languages,
+  IndianRupee,
+  Clock
 } from 'lucide-react';
 import { getNearbyDoctors, Doctor } from '../services/locationService';
 
@@ -21,6 +25,7 @@ const FindHelpPage: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedDoctor, setExpandedDoctor] = useState<string | null>(null);
   
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -56,13 +61,24 @@ const FindHelpPage: React.FC = () => {
     { value: 'therapist', label: 'Therapist' },
     { value: 'counselor', label: 'Counselor' },
   ];
+
+  const cities = [
+    'Mumbai',
+    'Delhi',
+    'Bangalore',
+    'Hyderabad',
+    'Chennai',
+    'Kolkata',
+    'Pune',
+    'Ahmedabad',
+  ];
   
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Find Mental Health Professionals</h1>
+        <h1 className="text-3xl font-bold mb-4">Find Mental Health Professionals in India</h1>
         <p className="text-gray-600">
-          Connect with qualified mental health providers in your area who can provide the support you need.
+          Connect with qualified mental health providers across major Indian cities who can provide the support you need.
         </p>
       </div>
       
@@ -75,7 +91,7 @@ const FindHelpPage: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Search by name, specialty, or location"
+              placeholder="Search by name, specialty, or city"
               className="input pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -105,17 +121,17 @@ const FindHelpPage: React.FC = () => {
               </select>
             </div>
             
-            <div className="relative w-48">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MapPin size={18} className="text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="City or ZIP"
-                className="input pl-10"
+            <div className="w-48">
+              <select
+                className="input"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-              />
+              >
+                <option value="">All Cities</option>
+                {cities.map((city) => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -147,20 +163,18 @@ const FindHelpPage: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location
+                City
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin size={18} className="text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="City or ZIP"
-                  className="input pl-10"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                />
-              </div>
+              <select
+                className="input"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              >
+                <option value="">All Cities</option>
+                {cities.map((city) => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
             </div>
           </motion.div>
         )}
@@ -176,9 +190,9 @@ const FindHelpPage: React.FC = () => {
             <Sliders size={16} className="mr-2" />
             <span className="mr-2">Sort by:</span>
             <select className="border-none bg-transparent font-medium text-gray-700 focus:outline-none focus:ring-0">
-              <option>Distance</option>
+              <option>Experience</option>
               <option>Rating</option>
-              <option>Name</option>
+              <option>Fees</option>
             </select>
           </div>
         </div>
@@ -209,7 +223,7 @@ const FindHelpPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredDoctors.map((doctor) => (
             <motion.div 
               key={doctor.id}
@@ -237,14 +251,20 @@ const FindHelpPage: React.FC = () => {
                     <span className="text-gray-700">{doctor.address}</span>
                   </div>
                   <div className="flex items-center">
-                    <Phone size={18} className="text-gray-400 mr-2" />
-                    <span className="text-gray-700">{doctor.phone}</span>
+                    <GraduationCap size={18} className="text-gray-400 mr-2" />
+                    <span className="text-gray-700">{doctor.education}</span>
                   </div>
                   <div className="flex items-center">
-                    <User size={18} className="text-gray-400 mr-2" />
-                    <span className="text-gray-700">
-                      {doctor.distance} miles away • In-person & Telehealth
-                    </span>
+                    <Clock size={18} className="text-gray-400 mr-2" />
+                    <span className="text-gray-700">Experience: {doctor.experience}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Languages size={18} className="text-gray-400 mr-2" />
+                    <span className="text-gray-700">{doctor.languages.join(', ')}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <IndianRupee size={18} className="text-gray-400 mr-2" />
+                    <span className="text-gray-700">Consultation: {doctor.fees}</span>
                   </div>
                 </div>
                 
@@ -258,7 +278,7 @@ const FindHelpPage: React.FC = () => {
                   </a>
                   <button className="btn-primary flex-1 flex justify-center items-center">
                     <Mail size={18} className="mr-1" />
-                    Contact
+                    Book Now
                   </button>
                 </div>
               </div>
@@ -282,17 +302,17 @@ const FindHelpPage: React.FC = () => {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white rounded-lg p-4 border border-primary-100">
-            <h4 className="font-semibold mb-2">National Crisis Line</h4>
-            <p className="text-gray-600 mb-2">Call or text 988 for immediate support.</p>
-            <a href="tel:988" className="text-primary-600 font-medium flex items-center">
-              <Phone size={16} className="mr-1" /> Call 988
+            <h4 className="font-semibold mb-2">NIMHANS Crisis Helpline</h4>
+            <p className="text-gray-600 mb-2">Call 080-46110007 for professional mental health support.</p>
+            <a href="tel:08046110007" className="text-primary-600 font-medium flex items-center">
+              <Phone size={16} className="mr-1" /> Call Helpline
             </a>
           </div>
           <div className="bg-white rounded-lg p-4 border border-primary-100">
-            <h4 className="font-semibold mb-2">Crisis Text Line</h4>
-            <p className="text-gray-600 mb-2">Text HOME to 741741 to connect with a counselor.</p>
-            <a href="sms:741741?&body=HOME" className="text-primary-600 font-medium flex items-center">
-              <Mail size={16} className="mr-1" /> Text 741741
+            <h4 className="font-semibold mb-2">iCall Helpline</h4>
+            <p className="text-gray-600 mb-2">Call 9152987821 for counseling support.</p>
+            <a href="tel:9152987821" className="text-primary-600 font-medium flex items-center">
+              <Phone size={16} className="mr-1" /> Call iCall
             </a>
           </div>
         </div>
