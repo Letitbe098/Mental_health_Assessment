@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
               <Logo />
-              <span className="text-xl font-bold text-primary-700">Calm Corner</span>
+              <span className="text-xl font-bold text-primary-700">MindfulCheck</span>
             </div>
             <p className="text-gray-600 mb-4">
               Revolutionizing mental health support with user-friendly self-assessment and personalized guidance.
@@ -90,7 +90,7 @@ const Footer: React.FC = () => {
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <Mail size={18} className="text-primary-500 mt-0.5" />
-                <span className="text-gray-600">support@Calm Corner.com</span>
+                <span className="text-gray-600">support@mindfulcheck.com</span>
               </li>
               <li className="flex items-start space-x-3">
                 <Phone size={18} className="text-primary-500 mt-0.5" />
@@ -105,7 +105,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Calm Corner. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} MindfulCheck. All rights reserved.</p>
         </div>
       </div>
     </footer>
