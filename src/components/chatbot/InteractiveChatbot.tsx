@@ -33,7 +33,6 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [currentRecommendations, setCurrentRecommendations] = useState<string[]>([]);
-  const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -70,16 +69,6 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
       };
 
       setMessages([welcomeMessage]);
-      setFollowUpQuestions([
-        "Very good",
-        "Good", 
-        "Okay",
-        "Not so good",
-        "Bad",
-        "Very bad",
-        "Terrible",
-        "Awful"
-      ]);
       setIsInitialized(true);
     } catch (error) {
       console.error("Failed to initialize chatbot:", error);
@@ -100,7 +89,6 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
-    setFollowUpQuestions([]);
 
     try {
       const response = await mlChatbotService.processMessage(textToSend, messages);
@@ -119,7 +107,6 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
 
         setMessages(prev => [...prev, botMessage]);
         setCurrentRecommendations(response.recommendations);
-        setFollowUpQuestions(response.followUpQuestions);
         setIsTyping(false);
 
         // Handle crisis situations
@@ -149,10 +136,6 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
       
       setMessages(prev => [...prev, errorMessage]);
     }
-  };
-
-  const handleQuickResponse = (question: string) => {
-    handleSendMessage(question);
   };
 
   const handleRecommendationClick = (recommendation: string) => {
@@ -209,12 +192,12 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed bottom-24 right-6 z-50 w-96 rounded-2xl shadow-2xl overflow-hidden flex flex-col bg-white border border-gray-200"
+            className="fixed bottom-24 right-6 z-50 w-[450px] rounded-2xl shadow-2xl overflow-hidden flex flex-col bg-white border border-gray-200"
             style={{ 
-              height: isMinimized ? "auto" : "600px",
-              maxHeight: "calc(100vh - 120px)", // Ensure it doesn't exceed viewport height
+              height: isMinimized ? "auto" : "700px",
+              maxHeight: "calc(100vh - 120px)",
               top: "auto",
-              bottom: "100px" // Fixed position from bottom
+              bottom: "100px"
             }}
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -253,7 +236,7 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
             {!isMinimized && (
               <>
                 {/* Messages - Scrollable area with proper padding */}
-                <div className="flex-grow p-4 overflow-y-auto bg-gray-50 min-h-0" style={{ maxHeight: "400px" }}>
+                <div className="flex-grow p-4 overflow-y-auto bg-gray-50 min-h-0" style={{ maxHeight: "500px" }}>
                   {messages.map((message) => (
                     <motion.div
                       key={message.id}
@@ -325,45 +308,26 @@ const InteractiveChatbot: React.FC<InteractiveChatbotProps> = ({ userProfile }) 
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Quick Actions */}
-                {(followUpQuestions.length > 0 || currentRecommendations.length > 0) && (
+                {/* Recommendations */}
+                {currentRecommendations.length > 0 && (
                   <div className="p-3 bg-white border-t border-gray-200 flex-shrink-0">
-                    {followUpQuestions.length > 0 && (
-                      <div className="mb-3">
-                        <p className="text-xs text-gray-500 mb-2">Quick responses:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {followUpQuestions.slice(0, 4).map((question, index) => (
-                            <button
-                              key={index}
-                              onClick={() => handleQuickResponse(question)}
-                              className="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-full hover:bg-primary-100 transition-colors"
-                            >
-                              {question}
-                            </button>
-                          ))}
-                        </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-2 flex items-center">
+                        <Lightbulb size={12} className="mr-1" />
+                        Recommendations:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {currentRecommendations.slice(0, 3).map((rec, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleRecommendationClick(rec)}
+                            className="text-xs bg-secondary-50 text-secondary-700 px-3 py-1 rounded-full hover:bg-secondary-100 transition-colors"
+                          >
+                            {rec}
+                          </button>
+                        ))}
                       </div>
-                    )}
-
-                    {currentRecommendations.length > 0 && (
-                      <div>
-                        <p className="text-xs text-gray-500 mb-2 flex items-center">
-                          <Lightbulb size={12} className="mr-1" />
-                          Recommendations:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {currentRecommendations.slice(0, 2).map((rec, index) => (
-                            <button
-                              key={index}
-                              onClick={() => handleRecommendationClick(rec)}
-                              className="text-xs bg-secondary-50 text-secondary-700 px-3 py-1 rounded-full hover:bg-secondary-100 transition-colors"
-                            >
-                              {rec}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 )}
 
