@@ -1,24 +1,21 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyBHieLdsjcZRXXNogO38B-E9D8TE3KRv5U",
+  authDomain: "mental-health-assessment-new.firebaseapp.com",
+  projectId: "mental-health-assessment-new",
+  storageBucket: "mental-health-assessment-new.firebasestorage.app",
+  messagingSenderId: "824298955850",
+  appId: "1:824298955850:web:01fa24865008e10768b2b3",
+  measurementId: "G-PQVS59KTSD"
 };
 
-// Replace the placeholder values with actual Firebase config values when deploying
-// For development, you can use environment variables or keep placeholders
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only if it hasn't been initialized already
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 

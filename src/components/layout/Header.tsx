@@ -63,7 +63,7 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-2">
             <Logo />
-            <span className="text-xl font-bold text-primary-700">MindfulCheck</span>
+            <span className="text-xl font-bold text-primary-700">Calm Corner</span>
           </Link>
 
           {/* Desktop Navigation */}
